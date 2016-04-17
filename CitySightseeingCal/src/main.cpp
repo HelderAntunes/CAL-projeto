@@ -1,5 +1,4 @@
 #include <cstdio>
-#include "graphviewer.h"
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -7,106 +6,158 @@
 #include <vector>
 #include <climits>
 #include <time.h>
+#include <map>
 #include <algorithm>
 #include "Graph.h"
+#include "graphviewer.h"
+
+typedef long long int ll;
 
 void readMaps();
-void createMapManually();
+double dist(pair<double,double> p1, pair<double,double> p2);
 
 int main() {
-
-	createMapManually();
+	readMaps();
 
 	getchar();
+
+	string s;
+
+	cout << "Bem-vindo!\n";
+
+	cout << endl;
+	cout << "Para utilizar este programa precisa indicar 3 ficheiros gerados pelo OpenStreetMapsParser.\n";
+	cout << "	Ficheiro A: informacao acerca dos nos\n";
+	cout << "	Ficheiro B: informacao acerca das estradas\n";
+	cout << "	Ficheiro C: informacao acerca das ligacoes entre os nos\n";
+	cout << endl;
+	cout << "Prima qualquer tecla para continuar..." << endl;
+	getchar();
+
+	cout << "Indique o nome do ficheiro A: ";
+	getline(cin, s);
+	cout << "Indique o nome do ficheiro B: ";
+	getline(cin, s);
+	cout << "Indique o nome do fichero C: ";
+	getline(cin, s);
+
+	cout << endl;
+	cout << "Grafo gerado pelo GraphViewerControler\n";
+	cout << endl;
+	cout << "Prima qualquer tecla para adicionar os turistas e seus pontos de interesse(POIs)" << endl;
+
+	getchar();
+
+	while(1){
+		cout << "Indique o nome de um turista, '0' para acabar a leitura: ";
+		getline(cin, s);
+		if(s == "0")
+			break;
+		cout << "Pontos de interesse(indique o id do no que representa o POI,\n";
+		cout << "visivel pelo GraphViewerController). '-1' indica fim dos POIs.\n";
+
+		while(1){
+			cout << "POI: ";
+			getline(cin, s);
+			if(s == "-1")
+				break;
+		}
+	}
+	cout << endl;
+
+	cout << "Indique a capacidade dos autocarros que pretende utilizar.\n";
+	cout << "Note que, se o numero de passageiros for superior a capcidade introduzida,\n";
+	cout << "irao ser gerados dois caminhos para grupos de turistas com POIs semelhantes.\n";
+	cout << "Capacidade: ";
+	getline(cin, s);
+
+	cout << endl;
+	cout << "Caminho(s) gerado(s)(tambem visiveis pelo GraphViewerController):\n";
+	// gerar caminhos do tipo n1->n2->...->nn
+	// no GraphViewerController podemos ver os caminhos coloridos :)
+	double d = 0;
+	cout << "Distancia percorrida: " << d << endl;
+
+	cout << endl;
+	cout << "Prima qualquer tecla para terminar..." << endl;
+	getchar();
+
 	return 0;
 }
 
-void createMapManually(){
-	int hRes = 600, vRes = 600;
-	GraphViewer *gv = new GraphViewer(hRes, vRes, false);
-	gv->createWindow(hRes, vRes);
-
-	for(int i = 0;i < 4;i++)
-		for(int j = 0;j<  4;j++)
-			gv->addNode(j+i*4, j*120 + 50, i*120+50);
-	srand(time(NULL));
-
-	gv->addEdge(0,0,1, EdgeType::DIRECTED);gv->setEdgeWeight(0, rand()%10);
-	gv->addEdge(1,1,2, EdgeType::DIRECTED);gv->setEdgeWeight(1, rand()%10);
-	gv->addEdge(2,2,3, EdgeType::DIRECTED);gv->setEdgeWeight(2, rand()%10);
-	gv->addEdge(3,7,6, EdgeType::DIRECTED);gv->setEdgeWeight(3, rand()%10);
-	gv->addEdge(4,6,5, EdgeType::DIRECTED);gv->setEdgeWeight(4, rand()%10);
-	gv->addEdge(5,5,4, EdgeType::DIRECTED);gv->setEdgeWeight(5, rand()%10);
-	gv->addEdge(6,8,9, EdgeType::DIRECTED);gv->setEdgeWeight(6, rand()%10);
-	gv->addEdge(7,9,10, EdgeType::DIRECTED);gv->setEdgeWeight(7, rand()%10);
-	gv->addEdge(8,10,11, EdgeType::DIRECTED);gv->setEdgeWeight(8, rand()%10);
-	gv->addEdge(9,15,14, EdgeType::DIRECTED);gv->setEdgeWeight(9, rand()%10);
-	gv->addEdge(10,14,13, EdgeType::DIRECTED);gv->setEdgeWeight(10, rand()%10);
-	gv->addEdge(11,13,12, EdgeType::DIRECTED);gv->setEdgeWeight(11, rand()%10);
-
-	gv->addEdge(12,0,5, EdgeType::DIRECTED);gv->setEdgeWeight(12, rand()%10);
-	gv->addEdge(13,5,10, EdgeType::DIRECTED);gv->setEdgeWeight(13, rand()%10);
-	gv->addEdge(14,10,15, EdgeType::DIRECTED);gv->setEdgeWeight(14, rand()%10);
-
-	gv->addEdge(15,0,4, EdgeType::DIRECTED);gv->setEdgeWeight(15, rand()%10);
-	gv->addEdge(16,4,8, EdgeType::DIRECTED);gv->setEdgeWeight(16, rand()%10);
-	gv->addEdge(17,8,12, EdgeType::DIRECTED);gv->setEdgeWeight(17, rand()%10);
-	gv->addEdge(18,3,7, EdgeType::DIRECTED);gv->setEdgeWeight(18, rand()%10);
-	gv->addEdge(19,7,11, EdgeType::DIRECTED);gv->setEdgeWeight(19, rand()%10);
-	gv->addEdge(20,11,15, EdgeType::DIRECTED);gv->setEdgeWeight(20, rand()%10);
-}
-
 /**
- * NOT WORKING!!!
- * Read Maps of street maps site.
+ * Read maps generated from OpenStreetMapsParser.
+ *
+ * Some values in file can exceed int gamma values. So
+ * It are used mapNodes and mapEdges to map long long int(ll)
+ * to int.
+ *
+ * NOT implemented yet:
+ * -> calculate distance between two points using latitude and longitude.
+ * -> read name of roads, and see if a road is two way.
+ * -> add to Graph class.
+ *
+ * For now, is possible see the graph:)
  */
 void readMaps()
 {
-	int hRes = 900, vRes = 600;
-	GraphViewer *gv = new GraphViewer(hRes, vRes, false);
-	gv->createWindow(hRes, vRes);
+	GraphViewer *gv = new GraphViewer(900, 600, false);
+	gv->createWindow(900, 600);
 
-	ifstream ifs ("nodes.txt");
-	long long int idnode;
+	ifstream ifs1 ("nodes.txt");
+	ifstream ifs2 ("edges.txt");
+	map<ll, int> mapNodes;
+	map<ll, int> mapEdges;
+	map<int, pair<double,double> > nodes;
+	map<int, pair<double,double> > edges;
+	int avoidProximity_Factor = 2000;
+	int idNode = 0;
+	int idEdge = 0;
+	ll idNodeLong;
+	ll idEdgeLong;
+	ll origin, dest;
 	char pontoVirgula;
 	double x, y, lixo;
-	vector< vector<double> > arrNodes;
-	double minLat = INT_MAX, maxLat = INT_MIN, minLon = INT_MAX, maxLon = INT_MIN;
+	double minLat = LLONG_MAX, maxLat = LLONG_MIN;
+	double minLon = LLONG_MAX, maxLon = LLONG_MIN;
 
-	while( !ifs.eof() ) {
-		ifs >> idnode >> pontoVirgula >> x >> pontoVirgula >> y >> pontoVirgula >> lixo >> pontoVirgula >> lixo >> pontoVirgula;
-		idnode %= 1000000009;
-		if(ifs.eof())
-			break;
-		vector<double> node;
-		node.push_back(idnode); node.push_back(x); node.push_back(y);
+	while( !ifs1.eof() ) {
+		ifs1 >> idNodeLong >> pontoVirgula >> x >> pontoVirgula >> y >>
+		pontoVirgula >> lixo >> pontoVirgula >> lixo;
+		mapNodes[idNodeLong] = idNode;
+		nodes[idNode] = pair<double,double>(x,y);
 		minLat = min(x,minLat); maxLat = max(x,maxLat);
 		minLon = min(y,minLon); maxLon = max(y, maxLon);
-		arrNodes.push_back(node);
+		idNode++;
 	}
-	ifs.close();
-	cout << arrNodes.size() << "\n";
-	for(unsigned int i = 0;i < arrNodes.size();i++){
+
+	for(unsigned int i = 0;i < nodes.size();i++){
 		int xScreen, yScreen;
-		xScreen = (arrNodes[i][1]-minLat)/(maxLat-minLat)*(500)+50;
-		yScreen = (arrNodes[i][2]-minLon)/(maxLon-minLon)*(555)+50;
-		gv->addNode(arrNodes[i][0], xScreen, yScreen);
-		cout << (int)arrNodes[i][0] << endl;
+		x = nodes[i].first;
+		y = nodes[i].second;
+		xScreen = (x-minLat)/(maxLat-minLat)*avoidProximity_Factor+50;
+		yScreen = (y-minLon)/(maxLon-minLon)*avoidProximity_Factor+50;
+		gv->addNode(i, xScreen, yScreen);
 	}
-	cout << "fdgfdgfdgdgdf\n" << endl;
 
-	ifstream ifs2 ("edges.txt");
-	//srand(time(NULL));
-	long long int idedge, ori, dest;
 	while( !ifs2.eof() ) {
-		ifs2 >> idedge >> pontoVirgula >> ori >> pontoVirgula >> dest >> pontoVirgula;
-		if(ifs2.eof())
-			break;
-
-		cout << idedge << pontoVirgula << ori << pontoVirgula << dest << pontoVirgula << endl;
-		//	gv->addEdge(idedge,ori,dest, EdgeType::DIRECTED);
-		//int weight = rand()%50;
-		//gv->setEdgeWeight(idedge, weight);
+		ifs2 >> idEdgeLong >> pontoVirgula >> origin >> pontoVirgula
+		>> dest >> pontoVirgula;
+		mapEdges[idEdgeLong] = idEdge;
+		int o = mapNodes[origin];
+		int d = mapNodes[dest];
+		gv->addEdge(idEdge, o, d, EdgeType::DIRECTED);
+		int weight = dist(nodes[o], nodes[d])*avoidProximity_Factor;
+		gv->setEdgeWeight(idEdge, weight);
+		idEdge++;
 	}
+	ifs1.close();
 	ifs2.close();
+}
+
+/**
+ * Calculate the distance between two points
+ */
+double dist(pair<double,double> p1, pair<double,double> p2){
+	return sqrt(  (p1.first-p2.first)*(p1.first-p2.first) + (p1.second-p2.second)*(p1.second-p2.second));
 }

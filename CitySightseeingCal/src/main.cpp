@@ -212,6 +212,7 @@ Graph<int> readMaps(ifstream &ifs1, ifstream &ifs2, ifstream &ifs3){
 
 	GraphViewer *gv = new GraphViewer(900, 600, false);
 	gv->createWindow(900, 600);
+	gv->defineEdgeCurved(false);
 
 	map<ll, int> mapNodes;
 	map<int, ll> mapIdEdgeToIdRoad;
@@ -273,6 +274,7 @@ Graph<int> readMaps(ifstream &ifs1, ifstream &ifs2, ifstream &ifs3){
 		x = (cos(latRad)*cos(longRad)*6371000);
 		y = (cos(latRad)*sin(longRad)*6371000);
 		gv->addNode(i, (x-minX)/(maxX-minX)*850 + 25, (y-minY)/(maxY-minY)*550 + 25);
+		gv->setVertexSize(i, 5);
 	}
 	while( 1 ) {
 		ifs3 >> idRoad >> pontoVirgula >> origin >> pontoVirgula >> dest >> pontoVirgula;

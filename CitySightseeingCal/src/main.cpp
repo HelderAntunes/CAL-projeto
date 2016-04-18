@@ -13,15 +13,17 @@
 
 typedef long long int ll;
 
-void readMaps();
+Graph<int> readMaps(ifstream &ifs1, ifstream &ifs2, ifstream &ifs3);
 double dist(pair<double,double> p1, pair<double,double> p2);
+Graph<int> createGraph(map<int, ll> mapIdEdgeToIdRoad, map<ll, pair<string, bool> > roads, map<int, pair<double,double> > nodes, map<int, pair<int,int> > edges,map<int,pair<double,bool> > weightOfEdges);
 
 int main() {
-	readMaps();
 
-	getchar();
+	Graph<int> g = Graph<int>();
 
 	string s;
+
+	string nodesflName, edgesflName, roadsflName;
 
 	cout << "Bem-vindo!\n";
 
@@ -34,13 +36,47 @@ int main() {
 	cout << "Prima qualquer tecla para continuar..." << endl;
 	getchar();
 
-	cout << "Indique o nome do ficheiro A: ";
-	getline(cin, s);
-	cout << "Indique o nome do ficheiro B: ";
-	getline(cin, s);
-	cout << "Indique o nome do fichero C: ";
-	getline(cin, s);
+	ifstream ifs1;
+	ifstream ifs2;
+	ifstream ifs3;
 
+	while(1){
+		cout << "Indique o nome do ficheiro A: ";
+		getline(cin, nodesflName);
+		ifs1.open(nodesflName.c_str());
+		if(ifs1.is_open() == false){
+			cout << "Erro ao abrir o ficheiro. Tente de novo.\n";
+		}
+		else
+			break;
+	}
+
+	while(1){
+		cout << "Indique o nome do ficheiro B: ";
+		getline(cin, roadsflName);
+		ifs2.open(roadsflName.c_str());
+		if(ifs2.is_open() == false)
+			cout << "Erro ao abrir o ficheiro. Tente de novo.\n";
+		else
+			break;
+	}
+
+	while(1){
+		cout << "Indique o nome do fichero C: ";
+		getline(cin, edgesflName);
+		ifs3.open(edgesflName.c_str());
+		if(ifs3.is_open() == false)
+			cout << "Erro ao abrir o ficheiro. Tente de novo.\n";
+		else
+			break;
+	}
+
+
+	g = readMaps(ifs1, ifs2, ifs3);
+
+	ifs1.close();
+	ifs2.close();
+	ifs3.close();
 	cout << endl;
 	cout << "Grafo gerado pelo GraphViewerControler\n";
 	cout << endl;
@@ -91,68 +127,56 @@ int main() {
  * Some values in file can exceed int gamma values. So
  * It are used mapNodes and mapEdges to map long long int(ll)
  * to int.
- *
- * NOT implemented yet:
- * -> read name of roads, and see if a road is two way.
- * -> add to Graph class.
- *
- * For now, is possible see the graph:)
  */
-void readMaps()
-{
+Graph<int> readMaps(ifstream &ifs1, ifstream &ifs2, ifstream &ifs3){
+
 	GraphViewer *gv = new GraphViewer(900, 600, false);
 	gv->createWindow(900, 600);
 
-	ifstream ifs1 ("nodes.txt");
-	ifstream ifs2 ("edges.txt");
-	ifstream ifs3 ("roads.txt");
 	map<ll, int> mapNodes;
 	map<int, ll> mapIdEdgeToIdRoad;
-	map<ll, pair<string, bool> > edgesLong;
+	map<ll, pair<string, bool> > roads;
 	map<int, pair<double,double> > nodes;
 	map<int, pair<int,int> > edges;
+	map<int,pair<double,bool> > weightOfEdges;
+
 	int avoidProximity_Factor = 2000;
 	int idNode = 0;
 	int idEdge = 0;
 	ll idNodeLong;
-	ll idEdgeLong;
+	ll idRoad;
 	ll origin, dest;
 	char pontoVirgula;
 	double x, y, lixo;
 	double minLat = LLONG_MAX, maxLat = LLONG_MIN;
 	double minLon = LLONG_MAX, maxLon = LLONG_MIN;
 	string roadName;
-
-	while(!ifs3.eof()){
-		ifs3 >> idEdgeLong >> pontoVirgula;
+	while(!ifs2.eof()){
+		ifs2 >> idRoad >> pontoVirgula;
 		roadName = "";
 		char c;
 		bool isTwoWay;
-		ifs3 >> c;
+		ifs2 >> c;
 		while(c != ';'){
 			roadName += c;
-			ifs3 >> c;
+			ifs2 >> c;
 		}
 		string s;
-		ifs3 >> s;
+		ifs2 >> s;
 		if(s == "True")
 			isTwoWay = true;
 		else
 			isTwoWay = false;
-		edgesLong[idEdgeLong] = pair<string,bool>(roadName,isTwoWay);
-
+		roads[idRoad] = pair<string,bool>(roadName,isTwoWay);
 	}
-
 	while( !ifs1.eof() ) {
-		ifs1 >> idNodeLong >> pontoVirgula >> lixo >> pontoVirgula >> lixo >>
-		pontoVirgula >> x >> pontoVirgula >> y;
+		ifs1 >> idNodeLong >> pontoVirgula >> lixo >> pontoVirgula >> lixo >> pontoVirgula >> x >> pontoVirgula >> y;
 		mapNodes[idNodeLong] = idNode;
 		nodes[idNode] = pair<double,double>(x,y);
 		minLat = min(x,minLat); maxLat = max(x,maxLat);
 		minLon = min(y,minLon); maxLon = max(y, maxLon);
 		idNode++;
 	}
-
 	for(unsigned int i = 0;i < nodes.size();i++){
 		int xScreen, yScreen;
 		x = nodes[i].first;
@@ -161,33 +185,48 @@ void readMaps()
 		yScreen = (y-minLon)/(maxLon-minLon)*avoidProximity_Factor+50;
 		gv->addNode(i, xScreen, yScreen);
 	}
-
-	while( !ifs2.eof() ) {
-		ifs2 >> idEdgeLong >> pontoVirgula >> origin >> pontoVirgula
-		>> dest >> pontoVirgula;
+	while( !ifs3.eof() ) {
+		ifs3 >> idRoad >> pontoVirgula >> origin >> pontoVirgula >> dest >> pontoVirgula;
 		int o = mapNodes[origin];
 		int d = mapNodes[dest];
-		mapIdEdgeToIdRoad[idEdge] = idEdgeLong;
+		mapIdEdgeToIdRoad[idEdge] = idRoad;
 		edges[idEdge] = pair<int,int>(o,d);
 
-		if(edgesLong[idEdgeLong].second == true){
+		if(roads[idRoad].second == true){
 			gv->addEdge(idEdge, o, d, EdgeType::UNDIRECTED);
 		}
 		else{
 			gv->addEdge(idEdge, o, d, EdgeType::DIRECTED);
 		}
 
-		int weight = dist(nodes[o], nodes[d])*avoidProximity_Factor;
+		double weight = dist(nodes[o], nodes[d])*avoidProximity_Factor;
+		weightOfEdges[idEdge] = pair<double,bool>(weight,roads[idRoad].second);
 		gv->setEdgeWeight(idEdge, weight);
 		idEdge++;
 	}
-	ifs1.close();
-	ifs2.close();
-	ifs3.close();
+	return createGraph(mapIdEdgeToIdRoad, roads, nodes, edges, weightOfEdges);
+}
+
+Graph<int> createGraph(map<int, ll> mapIdEdgeToIdRoad, map<ll, pair<string, bool> > roads, map<int, pair<double,double> > nodes, map<int, pair<int,int> > edges,map<int,pair<double,bool> > weightOfEdges){
+	Graph<int> g = Graph<int>();
+	for(unsigned int i = 0;i < nodes.size();i++)
+		g.addVertex(i);
+	for(unsigned int i = 0;i < edges.size();i++){
+		if(weightOfEdges[i].second == true){
+			g.addEdge(edges[i].first, edges[i].second, weightOfEdges[i].first);
+			g.addEdge(edges[i].second, edges[i].first, weightOfEdges[i].first);
+		}
+		else{
+			g.addEdge(edges[i].first, edges[i].second, weightOfEdges[i].first);
+		}
+
+	}
+	return g;
 }
 
 /**
- * Calculate the distance between two points using haversine formula
+ * Calculate the distance between two points using haversine formula.
+ * Pairs contains latitude and longitude values
  */
 double dist(pair<double,double> p1, pair<double,double> p2){
 	const double R = 6371000;
@@ -199,8 +238,8 @@ double dist(pair<double,double> p1, pair<double,double> p2){
 	double difLon = abs(lonRad1-lonRad2);
 
 	double a = sin(difLat/2)*sin(difLat/2) +
-				cos(latRad1)*cos(latRad2)*
-				sin(difLon/2)*sin(difLon/2);
+			cos(latRad1)*cos(latRad2)*
+			sin(difLon/2)*sin(difLon/2);
 	double c = 2*atan2(sqrt(a), sqrt(1-a));
 
 	return R*c;

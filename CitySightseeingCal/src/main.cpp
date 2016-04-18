@@ -93,7 +93,6 @@ int main() {
  * to int.
  *
  * NOT implemented yet:
- * -> calculate distance between two points using latitude and longitude.
  * -> read name of roads, and see if a road is two way.
  * -> add to Graph class.
  *
@@ -106,10 +105,12 @@ void readMaps()
 
 	ifstream ifs1 ("nodes.txt");
 	ifstream ifs2 ("edges.txt");
+	ifstream ifs3 ("roads.txt");
 	map<ll, int> mapNodes;
-	map<ll, int> mapEdges;
+	map<int, ll> mapIdEdgeToIdRoad;
+	map<ll, pair<string, bool> > edgesLong;
 	map<int, pair<double,double> > nodes;
-	map<int, pair<double,double> > edges;
+	map<int, pair<int,int> > edges;
 	int avoidProximity_Factor = 2000;
 	int idNode = 0;
 	int idEdge = 0;
@@ -120,10 +121,31 @@ void readMaps()
 	double x, y, lixo;
 	double minLat = LLONG_MAX, maxLat = LLONG_MIN;
 	double minLon = LLONG_MAX, maxLon = LLONG_MIN;
+	string roadName;
+
+	while(!ifs3.eof()){
+		ifs3 >> idEdgeLong >> pontoVirgula;
+		roadName = "";
+		char c;
+		bool isTwoWay;
+		ifs3 >> c;
+		while(c != ';'){
+			roadName += c;
+			ifs3 >> c;
+		}
+		string s;
+		ifs3 >> s;
+		if(s == "True")
+			isTwoWay = true;
+		else
+			isTwoWay = false;
+		edgesLong[idEdgeLong] = pair<string,bool>(roadName,isTwoWay);
+
+	}
 
 	while( !ifs1.eof() ) {
-		ifs1 >> idNodeLong >> pontoVirgula >> x >> pontoVirgula >> y >>
-		pontoVirgula >> lixo >> pontoVirgula >> lixo;
+		ifs1 >> idNodeLong >> pontoVirgula >> lixo >> pontoVirgula >> lixo >>
+		pontoVirgula >> x >> pontoVirgula >> y;
 		mapNodes[idNodeLong] = idNode;
 		nodes[idNode] = pair<double,double>(x,y);
 		minLat = min(x,minLat); maxLat = max(x,maxLat);
@@ -143,21 +165,43 @@ void readMaps()
 	while( !ifs2.eof() ) {
 		ifs2 >> idEdgeLong >> pontoVirgula >> origin >> pontoVirgula
 		>> dest >> pontoVirgula;
-		mapEdges[idEdgeLong] = idEdge;
 		int o = mapNodes[origin];
 		int d = mapNodes[dest];
-		gv->addEdge(idEdge, o, d, EdgeType::DIRECTED);
+		mapIdEdgeToIdRoad[idEdge] = idEdgeLong;
+		edges[idEdge] = pair<int,int>(o,d);
+
+		if(edgesLong[idEdgeLong].second == true){
+			gv->addEdge(idEdge, o, d, EdgeType::UNDIRECTED);
+		}
+		else{
+			gv->addEdge(idEdge, o, d, EdgeType::DIRECTED);
+		}
+
 		int weight = dist(nodes[o], nodes[d])*avoidProximity_Factor;
 		gv->setEdgeWeight(idEdge, weight);
 		idEdge++;
 	}
 	ifs1.close();
 	ifs2.close();
+	ifs3.close();
 }
 
 /**
- * Calculate the distance between two points
+ * Calculate the distance between two points using haversine formula
  */
 double dist(pair<double,double> p1, pair<double,double> p2){
-	return sqrt(  (p1.first-p2.first)*(p1.first-p2.first) + (p1.second-p2.second)*(p1.second-p2.second));
+	const double R = 6371000;
+	double latRad1 = p1.first;
+	double latRad2 = p2.first;
+	double lonRad1 = p1.second;
+	double lonRad2 = p2.second;
+	double difLat = abs(latRad1-latRad2);
+	double difLon = abs(lonRad1-lonRad2);
+
+	double a = sin(difLat/2)*sin(difLat/2) +
+				cos(latRad1)*cos(latRad2)*
+				sin(difLon/2)*sin(difLon/2);
+	double c = 2*atan2(sqrt(a), sqrt(1-a));
+
+	return R*c;
 }

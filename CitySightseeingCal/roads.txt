@@ -1,0 +1,5 @@
+331655263;Rua Canastreiros;False
+332154471;;True
+332154477;;True
+210348760;Rua Canastreiros;True
+39679967;Rua do Cais da Ribeira;True

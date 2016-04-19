@@ -13,12 +13,10 @@
 #include "Graph.h"
 #include "graphviewer.h"
 #include "Person.h"
+#include "MapReading.h"
 
 typedef long long int ll;
 
-Graph<int> readMaps(ifstream &ifs1, ifstream &ifs2, ifstream &ifs3, GraphViewer *gv);
-double dist(pair<double,double> p1, pair<double,double> p2);
-Graph<int> createGraph(map<int, ll> mapIdEdgeToIdRoad, map<ll, pair<string, bool> > roads, map<int, pair<double,double> > nodes, map<int, pair<int,int> > edges,map<int,pair<double,bool> > weightOfEdges);
 string getFileName(string fileLetter);
 int getOption();
 vector<Person> readPersonsFromFile(string fileName);
@@ -31,10 +29,9 @@ set<int> getPoisFromPersons(vector<Person>& persons);
 
 int main() {
 	GraphViewer *gv = new GraphViewer(900, 600, false);
+	MapReading mr;
 	set<int> pois;
-	gv->createWindow(900, 600);
-	gv->defineEdgeCurved(false);
-	Graph<int> g = Graph<int>();
+	Graph<int> g;
 	vector<Person> persons;
 	int capacityBus;
 
@@ -47,26 +44,21 @@ int main() {
 	cout << "	Ficheiro C: informacao acerca das ligacoes entre os nos\n";
 	cout << endl;
 	cout << "Prima qualquer tecla para continuar..." << endl;
+	cout << endl;
 	getchar();
 
 	cout << "Pretende utilizar ficheiros por defeito y/n: ";
-
-	ifstream ifsNodes;
-	ifstream ifsRoads;
-	ifstream ifsEdges;
 	while(1){
 		string y;
 		getline(cin, y);
 		if(y == "y"){
-			ifsNodes.open("nodes.txt");
-			ifsRoads.open("roads.txt");
-			ifsEdges.open("edges.txt");
+			cout << "Espere um momento...";
+			mr.readMap("nodes.txt", "roads.txt", "edges.txt");
 			break;
 		}
 		else if(y == "n"){
-			ifsNodes.open(getFileName("A").c_str());
-			ifsRoads.open(getFileName("B").c_str());
-			ifsEdges.open(getFileName("C").c_str());
+			cout << "Espere um momento...";
+			mr.readMap(getFileName("A"), getFileName("B"), getFileName("C"));
 			break;
 		}
 		else{
@@ -74,43 +66,36 @@ int main() {
 			cout << ">> ";
 		}
 	}
-
 	cout << endl;
-	cout << "Espere um momento ate o mapa ser lido..." << endl;
+	g = mr.getGraph();
 
-	g = readMaps(ifsNodes, ifsRoads, ifsEdges, gv);
+	gv->createWindow(900, 600);
+	gv->defineEdgeCurved(false);
+	mr.sendDataToGraphViewer(gv);
 	gv->rearrange();
+	cout << endl;
+	cout << "Grafo visivel pelo GraphViewerControler\n";
+	cout << endl;
+
 	int idStart = readStartNode();
 	int idEnd = readArrivalNode();
-
 	gv->setVertexLabel(idStart, "No de partida");
 	gv->setVertexLabel(idEnd, "No de chegada");
 	gv->rearrange();
 
-	ifsNodes.close();
-	ifsRoads.close();
-	ifsEdges.close();
-
-	cout << endl;
-	cout << "Grafo gerado pelo GraphViewerControler\n";
-	cout << endl;
 	cout << "Prima qualquer tecla para adicionar os turistas e seus pontos de interesse(POIs)" << endl;
-
 	getchar();
-
 	cout << "Para adicionar turistas e seus POIS pode adicionar manualmente ou carrega-los de um ficheiro.\n";
 	cout << "Selecione a opcao desejada:\n";
 	cout << "1 -> adicionar manualmente\n";
 	cout << "2 -> carregar de um ficheiro\n";
 	cout << ">> ";
 	string s;
-
 	int option = getOption();
 	if(option == 1)
 		persons = readPersonsFromInput();
 	else if(option == 2)
 		persons = readPersonsFromFile(getFileName("que contem os turistas e seus POIS"));
-
 	pois = getPoisFromPersons(persons);
 	addPoisToGraphViewer(gv,pois);
 	gv->rearrange();
@@ -119,24 +104,22 @@ int main() {
 	cout << "Indique a capacidade dos autocarros que pretende utilizar.\n";
 	cout << "Note que, se o numero de passageiros for superior a capacidade introduzida,\n";
 	cout << "irao ser gerados dois caminhos para grupos de turistas com POIs semelhantes.\n";
-
 	capacityBus = readCapacityFromInput();
 
 	cout << endl;
 	cout << "Caminho(s) gerado(s)(tambem visiveis pelo GraphViewerController):\n";
 
-
-	g.floydWarshallShortestPath(); // le caminho mais curto entre todos os pontos.
+	g.floydWarshallShortestPath();
 
 	Graph<int> g2 = Graph<int>();
 
-	// add vertexs
+	// add pois to g2
 	pois.insert(idStart);
 	pois.insert(idEnd);
 	for (std::set<int>::iterator it=pois.begin(); it!=pois.end(); ++it)
-			g2.addVertex(*it);
+		g2.addVertex(*it);
 
-	// add edges
+	// add edges to g2
 	vector<vector<int> > W = g.getWeightBetweenAllVertexs();
 	for (std::set<int>::iterator it=pois.begin(); it!=pois.end(); ++it)
 		for (std::set<int>::iterator it2=pois.begin(); it2!=pois.end(); ++it2){
@@ -145,9 +128,14 @@ int main() {
 				g2.addEdge(*it, *it2, weight);
 			}
 		}
-
 	vector<int> path = g2.getPathSalesmanProblem(idStart, idEnd);
 
+	cout << "Caminho gerado:\n";
+	for(size_t i = 0;i < path.size();i++){
+		cout << path[i] << "  ";
+	}
+
+	cout << endl;
 	double d = 0;
 	cout << "Distancia percorrida: " << d << endl;
 
@@ -204,7 +192,6 @@ int readArrivalNode(){
 		}
 	}
 }
-
 
 int readCapacityFromInput(){
 	string s;
@@ -292,101 +279,6 @@ string getFileName(string fileLetter){
 	return fileName;
 }
 
-/**
- * Read maps generated from OpenStreetMapsParser.
- *
- * Some values in file can exceed int gamma values. So
- * It are used mapNodes and mapEdges to map long long int(ll)
- * to int.
- */
-Graph<int> readMaps(ifstream &ifs1, ifstream &ifs2, ifstream &ifs3, GraphViewer *gv){
-
-	map<ll, int> mapNodes;
-	map<int, ll> mapIdEdgeToIdRoad;
-	map<ll, pair<string, bool> > roads;
-	map<int, pair<double,double> > nodes;
-	map<int, pair<int,int> > edges;
-	map<int,pair<double,bool> > weightOfEdges;
-
-	int idNode = 0;
-	int idEdge = 0;
-	ll idNodeLong;
-	ll idRoad;
-	ll origin, dest;
-	char pontoVirgula;
-	double longRad, latRad, lixo;
-	double minX = LLONG_MAX;
-	double minY = LLONG_MAX;
-	double maxX = LLONG_MIN;
-	double maxY = LLONG_MIN;
-	string roadName;
-	while(1){
-		ifs2 >> idRoad >> pontoVirgula;
-		if(ifs2.eof())
-			break;
-		roadName = "";
-		char c;
-		bool isTwoWay;
-		ifs2 >> c;
-		while(c != ';'){
-			roadName += c;
-			ifs2 >> c;
-		}
-		string s;
-		ifs2 >> s;
-		if(s == "True")
-			isTwoWay = true;
-		else
-			isTwoWay = false;
-		roads[idRoad] = pair<string,bool>(roadName,isTwoWay);
-	}
-	while( 1 ) {
-		ifs1 >> idNodeLong >> pontoVirgula >> lixo >> pontoVirgula >> lixo >> pontoVirgula >> longRad >> pontoVirgula >> latRad;
-		if(ifs1.eof())
-			break;
-		mapNodes[idNodeLong] = idNode;
-		nodes[idNode] = pair<double,double>(longRad,latRad);
-		minX = min(minX, (cos(latRad)*cos(longRad)*6371000));
-		minY = min(minY, (cos(latRad)*sin(longRad)*6371000));
-		maxX = max(maxX, (cos(latRad)*cos(longRad)*6371000));
-		maxY = max(maxY, (cos(latRad)*sin(longRad)*6371000));
-		idNode++;
-	}
-
-	for(unsigned int i = 0;i < nodes.size();i++){
-		double x, y;
-		longRad = nodes[i].first;
-		latRad = nodes[i].second;
-		x = (cos(latRad)*cos(longRad)*6371000);
-		y = (cos(latRad)*sin(longRad)*6371000);
-		gv->addNode(i, (x-minX)/(maxX-minX)*850 + 25, (y-minY)/(maxY-minY)*550 + 25);
-		gv->setVertexSize(i, 5);
-	}
-	while( 1 ) {
-		ifs3 >> idRoad >> pontoVirgula >> origin >> pontoVirgula >> dest >> pontoVirgula;
-		if(ifs3.eof())
-			break;
-		int o = mapNodes[origin];
-		int d = mapNodes[dest];
-		mapIdEdgeToIdRoad[idEdge] = idRoad;
-		edges[idEdge] = pair<int,int>(o,d);
-
-		if(roads[idRoad].second == true){
-			gv->addEdge(idEdge, o, d, EdgeType::UNDIRECTED);
-		}
-		else{
-			gv->addEdge(idEdge, o, d, EdgeType::DIRECTED);
-		}
-
-		double weight = dist(nodes[o], nodes[d]);
-		weightOfEdges[idEdge] = pair<double,bool>(weight,roads[idRoad].second);
-		gv->setEdgeFlow(idEdge, weight);
-		//gv->setEdgeLabel(idEdge, roads[idRoad].first);
-		idEdge++;
-	}
-	return createGraph(mapIdEdgeToIdRoad, roads, nodes, edges, weightOfEdges);
-}
-
 int getOption(){
 	string s;
 	while(1){
@@ -400,39 +292,4 @@ int getOption(){
 			cout << ">> ";
 		}
 	}
-}
-
-Graph<int> createGraph(map<int, ll> mapIdEdgeToIdRoad, map<ll, pair<string, bool> > roads, map<int, pair<double,double> > nodes, map<int, pair<int,int> > edges,map<int,pair<double,bool> > weightOfEdges){
-	Graph<int> g = Graph<int>();
-	for(unsigned int i = 0;i < nodes.size();i++)
-		g.addVertex(i);
-	for(unsigned int i = 0;i < edges.size();i++)
-		if(weightOfEdges[i].second == true){
-			g.addEdge(edges[i].first, edges[i].second, weightOfEdges[i].first);
-			g.addEdge(edges[i].second, edges[i].first, weightOfEdges[i].first);
-		}
-		else
-			g.addEdge(edges[i].first, edges[i].second, weightOfEdges[i].first);
-	return g;
-}
-
-/**
- * Calculate the distance between two points using 'haversine' formula.
- * Pairs contains latitude and longitude values
- */
-double dist(pair<double,double> p1, pair<double,double> p2){
-	const double R = 6371000;
-	double latRad1 = p1.first;
-	double latRad2 = p2.first;
-	double lonRad1 = p1.second;
-	double lonRad2 = p2.second;
-	double difLat = abs(latRad1-latRad2);
-	double difLon = abs(lonRad1-lonRad2);
-
-	double a = sin(difLat/2)*sin(difLat/2) +
-			cos(latRad1)*cos(latRad2)*
-			sin(difLon/2)*sin(difLon/2);
-	double c = 2*atan2(sqrt(a), sqrt(1-a));
-
-	return R*c;
 }

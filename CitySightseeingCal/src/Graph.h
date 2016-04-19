@@ -182,6 +182,11 @@ public:
 	int edgeCost(int i, int j);
 	vector<T> getfloydWarshallPath(const T &origin, const T &dest);
 
+	vector<vector<T> > getWeightBetweenAllVertexs();
+	vector<T> getPathSalesmanProblem(T idStart,T idEnd);
+	void salesmanProblemAux(Vertex<T> *v,Vertex<T> *x, vector<T> &res, int numberEdgesVisited);
+
+
 };
 
 
@@ -284,9 +289,6 @@ bool Graph<T>::removeEdge(const T &sourc, const T &dest) {
 	return vS->removeEdgeTo(vD);
 }
 
-
-
-
 template <class T>
 vector<T> Graph<T>::dfs() const {
 	typename vector<Vertex<T>*>::const_iterator it= vertexSet.begin();
@@ -311,6 +313,45 @@ void Graph<T>::dfs(Vertex<T> *v,vector<T> &res) const {
 		if ( it->dest->visited == false ){
 			dfs(it->dest, res);
 		}
+}
+
+template <class T>
+vector<T> Graph<T>::getPathSalesmanProblem(T idStart,T idEnd){
+	typename vector<Vertex<T>*>::const_iterator it= vertexSet.begin();
+	typename vector<Vertex<T>*>::const_iterator ite= vertexSet.end();
+	for (; it !=ite; it++)
+		(*it)->visited=false;
+
+	vector<T> res;
+	Vertex<T> *v = getVertex(idStart);
+	Vertex<T> *x = getVertex(idEnd);
+	salesmanProblemAux(v, x, res, 0);
+	return res;
+}
+
+template <class T>
+void Graph<T>::salesmanProblemAux(Vertex<T> *v,Vertex<T> *x, vector<T> &res, int numberEdgesVisited){
+	v->visited = true;
+	numberEdgesVisited++;
+	res.push_back(v->info);
+
+
+	Vertex<T> *d = NULL;
+	int weight = INT_INFINITY;
+	typename vector<Edge<T> >::iterator it= (v->adj).begin();
+	typename vector<Edge<T> >::iterator ite= (v->adj).end();
+	for (; it !=ite; it++)
+		if(numberEdgesVisited == vertexSet.size()-1){
+			res.push_back(x->info);
+			return;
+		}
+		else if ( it->dest->visited == false && it->dest != x){
+			if(it->weight < weight){
+				d = it->dest;
+				weight = it->weight;
+			}
+		}
+	salesmanProblemAux(d, x, res, numberEdgesVisited);
 }
 
 template <class T>
@@ -633,6 +674,11 @@ void Graph<T>::floydWarshallShortestPath(){
 }
 
 template<class T>
+vector<vector<T> > Graph<T>::getWeightBetweenAllVertexs(){
+	return W;
+}
+
+template<class T>
 vector<T> Graph<T>::getfloydWarshallPath(const T &origin, const T &dest){
 	vector<T> ans;
 	Vertex<T>* s = getVertex(origin);
@@ -654,5 +700,7 @@ vector<T> Graph<T>::getfloydWarshallPath(const T &origin, const T &dest){
 	}
 	return ans;
 }
+
+
 
 #endif /* GRAPH_H_ */

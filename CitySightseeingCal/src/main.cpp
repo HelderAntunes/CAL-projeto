@@ -9,13 +9,14 @@
 #include <map>
 #include <string>
 #include <algorithm>
+#include <set>
 #include "Graph.h"
 #include "graphviewer.h"
 #include "Person.h"
 
 typedef long long int ll;
 
-Graph<int> readMaps(ifstream &ifs1, ifstream &ifs2, ifstream &ifs3);
+Graph<int> readMaps(ifstream &ifs1, ifstream &ifs2, ifstream &ifs3, GraphViewer *gv);
 double dist(pair<double,double> p1, pair<double,double> p2);
 Graph<int> createGraph(map<int, ll> mapIdEdgeToIdRoad, map<ll, pair<string, bool> > roads, map<int, pair<double,double> > nodes, map<int, pair<int,int> > edges,map<int,pair<double,bool> > weightOfEdges);
 string getFileName(string fileLetter);
@@ -23,9 +24,16 @@ int getOption();
 vector<Person> readPersonsFromFile(string fileName);
 vector<Person> readPersonsFromInput();
 int readCapacityFromInput();
+int readArrivalNode();
+int readStartNode();
+void addPoisToGraphViewer(GraphViewer *gv, set<int>& pois);
+set<int> getPoisFromPersons(vector<Person>& persons);
 
 int main() {
-
+	GraphViewer *gv = new GraphViewer(900, 600, false);
+	set<int> pois;
+	gv->createWindow(900, 600);
+	gv->defineEdgeCurved(false);
 	Graph<int> g = Graph<int>();
 	vector<Person> persons;
 	int capacityBus;
@@ -67,9 +75,17 @@ int main() {
 		}
 	}
 
-	cout << "\nEspere um momento..." << endl;
+	cout << endl;
+	cout << "Espere um momento ate o mapa ser lido..." << endl;
 
-	g = readMaps(ifsNodes, ifsRoads, ifsEdges);
+	g = readMaps(ifsNodes, ifsRoads, ifsEdges, gv);
+	gv->rearrange();
+	int idStart = readStartNode();
+	int idEnd = readArrivalNode();
+
+	gv->setVertexLabel(idStart, "No de partida");
+	gv->setVertexLabel(idEnd, "No de chegada");
+	gv->rearrange();
 
 	ifsNodes.close();
 	ifsRoads.close();
@@ -95,6 +111,11 @@ int main() {
 	else if(option == 2)
 		persons = readPersonsFromFile(getFileName("que contem os turistas e seus POIS"));
 
+	pois = getPoisFromPersons(persons);
+	addPoisToGraphViewer(gv,pois);
+	gv->rearrange();
+
+	cout << "\n";
 	cout << "Indique a capacidade dos autocarros que pretende utilizar.\n";
 	cout << "Note que, se o numero de passageiros for superior a capacidade introduzida,\n";
 	cout << "irao ser gerados dois caminhos para grupos de turistas com POIs semelhantes.\n";
@@ -103,8 +124,30 @@ int main() {
 
 	cout << endl;
 	cout << "Caminho(s) gerado(s)(tambem visiveis pelo GraphViewerController):\n";
-	// gerar caminhos do tipo n1->n2->...->nn
-	// no GraphViewerController podemos ver os caminhos coloridos :)
+
+
+	g.floydWarshallShortestPath(); // le caminho mais curto entre todos os pontos.
+
+	Graph<int> g2 = Graph<int>();
+
+	// add vertexs
+	pois.insert(idStart);
+	pois.insert(idEnd);
+	for (std::set<int>::iterator it=pois.begin(); it!=pois.end(); ++it)
+			g2.addVertex(*it);
+
+	// add edges
+	vector<vector<int> > W = g.getWeightBetweenAllVertexs();
+	for (std::set<int>::iterator it=pois.begin(); it!=pois.end(); ++it)
+		for (std::set<int>::iterator it2=pois.begin(); it2!=pois.end(); ++it2){
+			int weight = W[*it][*it2];
+			if(weight != 0 && weight != INT_INFINITY){
+				g2.addEdge(*it, *it2, weight);
+			}
+		}
+
+	vector<int> path = g2.getPathSalesmanProblem(idStart, idEnd);
+
 	double d = 0;
 	cout << "Distancia percorrida: " << d << endl;
 
@@ -114,6 +157,54 @@ int main() {
 
 	return 0;
 }
+
+set<int> getPoisFromPersons(vector<Person>& persons){
+	set<int> pois;
+	for(size_t i = 0;i < persons.size();i++){
+		vector<int> poisOfPerson = persons[i].getPois();
+		for(size_t j = 0;j < poisOfPerson.size();j++)
+			pois.insert(poisOfPerson[j]);
+	}
+	return pois;
+}
+
+void addPoisToGraphViewer(GraphViewer *gv, set<int>& pois){
+	for (std::set<int>::iterator it=pois.begin(); it!=pois.end(); ++it)
+		gv->setVertexColor(*it, "BLUE");
+}
+
+int readStartNode(){
+	string no;
+	int idStart;
+	cout << "Indique o no de partida: ";
+	while(1){
+		getline(cin, no);
+		istringstream ss(no);
+		if(ss >> idStart)
+			return idStart;
+		else{
+			cout << "No invalido. Tente de novo\n";
+			cout << ">> ";
+		}
+	}
+}
+
+int readArrivalNode(){
+	string no;
+	int idArrival;
+	cout << "Indique o no de chegada: ";
+	while(1){
+		getline(cin, no);
+		istringstream ss(no);
+		if(ss >> idArrival)
+			return idArrival;
+		else{
+			cout << "No invalido. Tente de novo\n";
+			cout << ">> ";
+		}
+	}
+}
+
 
 int readCapacityFromInput(){
 	string s;
@@ -208,11 +299,7 @@ string getFileName(string fileLetter){
  * It are used mapNodes and mapEdges to map long long int(ll)
  * to int.
  */
-Graph<int> readMaps(ifstream &ifs1, ifstream &ifs2, ifstream &ifs3){
-
-	GraphViewer *gv = new GraphViewer(900, 600, false);
-	gv->createWindow(900, 600);
-	gv->defineEdgeCurved(false);
+Graph<int> readMaps(ifstream &ifs1, ifstream &ifs2, ifstream &ifs3, GraphViewer *gv){
 
 	map<ll, int> mapNodes;
 	map<int, ll> mapIdEdgeToIdRoad;
@@ -221,7 +308,6 @@ Graph<int> readMaps(ifstream &ifs1, ifstream &ifs2, ifstream &ifs3){
 	map<int, pair<int,int> > edges;
 	map<int,pair<double,bool> > weightOfEdges;
 
-	int avoidProximity_Factor = 2000;
 	int idNode = 0;
 	int idEdge = 0;
 	ll idNodeLong;
@@ -292,9 +378,9 @@ Graph<int> readMaps(ifstream &ifs1, ifstream &ifs2, ifstream &ifs3){
 			gv->addEdge(idEdge, o, d, EdgeType::DIRECTED);
 		}
 
-		double weight = dist(nodes[o], nodes[d])*avoidProximity_Factor;
+		double weight = dist(nodes[o], nodes[d]);
 		weightOfEdges[idEdge] = pair<double,bool>(weight,roads[idRoad].second);
-		gv->setEdgeWeight(idEdge, weight);
+		gv->setEdgeFlow(idEdge, weight);
 		//gv->setEdgeLabel(idEdge, roads[idRoad].first);
 		idEdge++;
 	}

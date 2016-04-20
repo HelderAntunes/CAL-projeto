@@ -73,7 +73,6 @@ int main() {
 
 	cout << endl;
 	cout << "Caminho(s) gerado(s)(tambem visiveis pelo GraphViewerController):\n";
-
 	g.floydWarshallShortestPath();
 
 	Graph<int> g2 = Graph<int>();
@@ -91,6 +90,12 @@ int main() {
 				g2.addEdge(*it, *it2, weight);
 			}
 		}
+
+	if(g2.isConnected() == false){
+		cout << "Alguns pontos de interesse(POIs) sao inacessiveis!!!" << endl;
+		return -1;
+	}
+
 	vector<int> path = g2.getPathSalesmanProblem(idStart, idEnd);
 	double d = 0;
 
@@ -98,7 +103,7 @@ int main() {
 	cout << "Caminho gerado:\n";
 	cout << path[0] << "  ";
 	for(size_t i = 1;i < path.size();i++){
-		cout << path[i] << "  ";
+		cout << path[i] << "  " << W[path[i-1]][path[i]] << endl;
 		d += W[path[i-1]][path[i]];
 	}
 

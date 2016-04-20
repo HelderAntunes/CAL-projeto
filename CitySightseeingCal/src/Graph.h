@@ -187,7 +187,7 @@ public:
 	vector<T> getPathSalesmanProblem(T idStart,T idEnd);
 	void salesmanProblemAux(Vertex<T> *vertexToProcess,Vertex<T> *endVertex, vector<T> &res, int numberEdgesVisited);
 
-
+	bool isConnected();
 };
 
 
@@ -288,6 +288,22 @@ bool Graph<T>::removeEdge(const T &sourc, const T &dest) {
 	vD->indegree--;
 
 	return vS->removeEdgeTo(vD);
+}
+
+template <class T>
+bool Graph<T>::isConnected(){
+	typename vector<Vertex<T>*>::const_iterator it= vertexSet.begin();
+	typename vector<Vertex<T>*>::const_iterator ite= vertexSet.end();
+	for (; it !=ite; it++)
+		(*it)->visited=false;
+	Vertex<T> *v = vertexSet[0];
+	vector<T> nodesVisited;
+	dfs(v, nodesVisited);
+
+	if(nodesVisited.size() == vertexSet.size())
+		return true;
+	else
+		return false;
 }
 
 template <class T>

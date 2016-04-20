@@ -185,7 +185,7 @@ public:
 
 	vector<vector<T> > getWeightBetweenAllVertexs();
 	vector<T> getPathSalesmanProblem(T idStart,T idEnd);
-	void salesmanProblemAux(Vertex<T> *v,Vertex<T> *x, vector<T> &res, int numberEdgesVisited);
+	void salesmanProblemAux(Vertex<T> *vertexToProcess,Vertex<T> *endVertex, vector<T> &res, int numberEdgesVisited);
 
 
 };
@@ -331,28 +331,28 @@ vector<T> Graph<T>::getPathSalesmanProblem(T idStart,T idEnd){
 }
 
 template <class T>
-void Graph<T>::salesmanProblemAux(Vertex<T> *v,Vertex<T> *x, vector<T> &res, int numberEdgesVisited){
-	v->visited = true;
+void Graph<T>::salesmanProblemAux(Vertex<T> *vertexToProcess,Vertex<T> *endVertex, vector<T> &res, int numberEdgesVisited){
+	vertexToProcess->visited = true;
 	numberEdgesVisited++;
-	res.push_back(v->info);
+	res.push_back(vertexToProcess->info);
 
 
-	Vertex<T> *d = NULL;
+	Vertex<T> *dest = NULL;
 	int weight = INT_INFINITY;
-	typename vector<Edge<T> >::iterator it= (v->adj).begin();
-	typename vector<Edge<T> >::iterator ite= (v->adj).end();
+	typename vector<Edge<T> >::iterator it= (vertexToProcess->adj).begin();
+	typename vector<Edge<T> >::iterator ite= (vertexToProcess->adj).end();
 	for (; it !=ite; it++)
 		if(numberEdgesVisited == vertexSet.size()-1){
-			res.push_back(x->info);
+			res.push_back(endVertex->info);
 			return;
 		}
-		else if ( it->dest->visited == false && it->dest != x){
+		else if ( it->dest->visited == false && it->dest != endVertex){
 			if(it->weight < weight){
-				d = it->dest;
+				dest = it->dest;
 				weight = it->weight;
 			}
 		}
-	salesmanProblemAux(d, x, res, numberEdgesVisited);
+	salesmanProblemAux(dest, endVertex, res, numberEdgesVisited);
 }
 
 template <class T>

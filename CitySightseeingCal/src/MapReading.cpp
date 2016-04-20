@@ -1,10 +1,3 @@
-/*
- * FilesController.cpp
- *
- *  Created on: 19/04/2016
- *      Author: Asus
- */
-
 #include "MapReading.h"
 
 /**

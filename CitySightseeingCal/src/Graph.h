@@ -11,6 +11,7 @@
 #include <cmath>
 #include <algorithm>
 #include <climits>
+#include <stack>
 
 
 using namespace std;
@@ -156,6 +157,9 @@ class Graph {
 	void dfsVisit();
 	void getPathTo(Vertex<T> *origin, list<T> &res);
 
+	void putInStackByPosOrder_SCC(Vertex<T>* v, stack<T>& stack);
+	void printOneComponent_SCC(Vertex<T>* v);
+
 public:
 	bool addVertex(const T &in);
 	bool addEdge(const T &sourc, const T &dest, double w);
@@ -188,6 +192,9 @@ public:
 	void salesmanProblemAux(Vertex<T> *vertexToProcess,Vertex<T> *endVertex, vector<T> &res, int numberEdgesVisited);
 
 	bool isConnected();
+	void printSCC();
+	Graph<T> getReversedGraph();
+
 };
 
 
@@ -330,6 +337,83 @@ void Graph<T>::dfs(Vertex<T> *v,vector<T> &res) const {
 		if ( it->dest->visited == false ){
 			dfs(it->dest, res);
 		}
+}
+
+template <class T>
+void Graph<T>::printSCC(){
+	stack<T> stack;
+
+	typename vector<Vertex<T>*>::const_iterator it= vertexSet.begin();
+	typename vector<Vertex<T>*>::const_iterator ite= vertexSet.end();
+	for (; it !=ite; it++)
+		(*it)->visited=false;
+
+	for(it = vertexSet.begin();it != ite;it++){
+		if((*it)->visited == false){
+			putInStackByPosOrder_SCC((*it), stack);
+		}
+	}
+
+	Graph<T> gr = getReversedGraph();
+
+	vector<Vertex<T> *> vertexSetGr = gr.getVertexSet();
+	for(int i = 0;i < vertexSetGr.size();i++){
+		vertexSetGr[i]->visited = false;
+	}
+
+	while(stack.empty() == false){
+		T v = stack.top();
+		stack.pop();
+
+		if(gr.getVertex(v)->visited == false){
+			gr.printOneComponent_SCC(gr.getVertex(v));
+			cout << endl;
+		}
+	}
+}
+
+template <class T>
+void Graph<T>::printOneComponent_SCC(Vertex<T>* v){
+	v->visited = true;
+	cout << v->info << "  ";
+
+	for(int i = 0;i < v->adj.size();i++){
+		if(v->adj[i].dest->visited == false){
+			printOneComponent_SCC(v->adj[i].dest);
+		}
+	}
+}
+
+template <class T>
+Graph<T> Graph<T>::getReversedGraph(){
+	Graph<T> gr;
+
+	for(int i = 0;i < vertexSet.size();i++){
+		gr.addVertex(vertexSet[i]->info);
+	}
+
+	for(int i = 0;i < vertexSet.size();i++){
+		for(int j = 0;j < vertexSet[i]->adj.size();j++){
+			Vertex<T>* v = gr.getVertex(vertexSet[i]->info);
+			Vertex<T>* w = gr.getVertex(vertexSet[i]->adj[j].dest->info);
+			w->addEdge(v, vertexSet[i]->adj[j].weight);
+		}
+	}
+	return gr;
+}
+
+
+template <class T>
+void Graph<T>::putInStackByPosOrder_SCC(Vertex<T>* v, stack<T>& stack){
+	v->visited = true;
+
+	for(int i = 0;i < v->adj.size();i++){
+		if(v->adj[i].dest->visited == false){
+			putInStackByPosOrder_SCC(v->adj[i].dest, stack);
+		}
+	}
+
+	stack.push(v->info);
 }
 
 template <class T>

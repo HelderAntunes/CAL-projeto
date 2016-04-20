@@ -111,6 +111,8 @@ int main() {
 
 	cout << "Distancia percorrida: " << d << endl;
 
+	cout << "Pontos de articulacao: ";
+
 	cout << endl;
 	cout << "Prima qualquer tecla para terminar..." << endl;
 	getchar();

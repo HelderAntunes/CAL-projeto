@@ -1,10 +1,3 @@
-/*
- * FilesController.h
- *
- *  Created on: 19/04/2016
- *      Author: Asus
- */
-
 #ifndef SRC_MAPREADING_H_
 #define SRC_MAPREADING_H_
 

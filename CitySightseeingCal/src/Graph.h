@@ -190,7 +190,6 @@ public:
 	vector<vector<T> > getWeightBetweenAllVertexs();
 	vector<T> getPathSalesmanProblem(T idStart,T idEnd);
 	void salesmanProblemAux(Vertex<T> *vertexToProcess,Vertex<T> *endVertex, vector<T> &res, int numberEdgesVisited);
-
 	bool isConnected();
 	void printSCC();
 	Graph<T> getReversedGraph();
@@ -427,6 +426,7 @@ vector<T> Graph<T>::getPathSalesmanProblem(T idStart,T idEnd){
 	Vertex<T> *v = getVertex(idStart);
 	Vertex<T> *x = getVertex(idEnd);
 	salesmanProblemAux(v, x, res, 0);
+
 	return res;
 }
 

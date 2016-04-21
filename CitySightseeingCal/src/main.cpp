@@ -18,27 +18,28 @@
 typedef long long int ll;
 
 vector<Person> readPersonsFromFile(string fileName);
-int readCapacityFromInput();
 int readArrivalNode();
 int readStartNode();
-void addPoisToGraphViewer(GraphViewer *gv, set<int>& pois);
-set<int> getPoisFromPersons(vector<Person>& persons);
+void addPoisToGraphViewer(GraphViewer *gv, vector<int>& pois);
+vector<int> getPoisFromPersons(vector<Person>& persons);
+vector<Graph<int> > calculatePaths(vector<Person>& persons, int idStart, int idEnd, vector<vector<int> >& W);
+Graph<int> createGraphUsingPois(vector<int>& pois, vector<vector<int> >& W);
+int calcDistOfPath(vector<int> path, vector<vector<int> >& W);
 
 int main() {
 	GraphViewer *gv = new GraphViewer(900, 600, false);
 	MapReading mr;
-	set<int> pois;
+	vector<int> pois;
 	Graph<int> g;
 	vector<Person> persons;
-	int capacityBus;
 
 	cout << "Bem-vindo!\n";
 
 	cout << endl;
 	cout << "Para utilizar este programa precisa indicar 3 ficheiros gerados pelo OpenStreetMapsParser.\n";
-	cout << "	Ficheiro nodes.txt: informacao acerca dos nos\n";
-	cout << "	Ficheiro edges.txt: informacao acerca das estradas\n";
-	cout << "	Ficheiro roads.txt: informacao acerca das ligacoes entre os nos\n\n";
+	cout << "	Ficheiro nodes.txt\n";
+	cout << "	Ficheiro edges.txt\n";
+	cout << "	Ficheiro roads.txt\n";
 	cout << "Precisa tambem do ficheiro\n"
 			"	persons.txt: informacao acerca das pessoas e seus pontos de interesse\n"
 			"Formatacao deste ficheiro:\n"
@@ -69,47 +70,20 @@ int main() {
 	addPoisToGraphViewer(gv,pois);
 	gv->rearrange();
 
-	capacityBus = readCapacityFromInput();
-
 	cout << endl;
 	cout << "Caminho(s) gerado(s)(tambem visiveis pelo GraphViewerController):\n";
+
 	g.floydWarshallShortestPath();
-
-	Graph<int> g2 = Graph<int>();
-
-	pois.insert(idStart);
-	pois.insert(idEnd);
-	for (std::set<int>::iterator it=pois.begin(); it!=pois.end(); ++it)
-		g2.addVertex(*it);
-
 	vector<vector<int> > W = g.getWeightBetweenAllVertexs();
-	for (std::set<int>::iterator it=pois.begin(); it!=pois.end(); ++it)
-		for (std::set<int>::iterator it2=pois.begin(); it2!=pois.end(); ++it2){
-			int weight = W[*it][*it2];
-			if(weight != 0 && weight != INT_INFINITY){
-				g2.addEdge(*it, *it2, weight);
-			}
-		}
 
-	if(g2.isConnected() == false){
-		cout << "Alguns pontos de interesse(POIs) sao inacessiveis!!!" << endl;
+	Graph<int> graphToTestConnectivity = createGraphUsingPois(pois, W);
+	if(graphToTestConnectivity.isConnected() == false){
+		cout << "Alguns pontos de interesse sao inacessiveis!!!" << endl;
+		cout << "Certifique-se que todos os POIs, no de partida e destino sao conexos entre si..." << endl;
 		return -1;
 	}
 
-	vector<int> path = g2.getPathSalesmanProblem(idStart, idEnd);
-	double d = 0;
-
-	cout << endl;
-	cout << "Caminho gerado:\n";
-	cout << path[0] << "  ";
-	for(size_t i = 1;i < path.size();i++){
-		cout << path[i] << "  " << W[path[i-1]][path[i]] << endl;
-		d += W[path[i-1]][path[i]];
-	}
-
-	cout << endl;
-
-	cout << "Distancia percorrida: " << d << endl;
+	vector<Graph<int> > graphs = calculatePaths(persons, idStart, idEnd, W);
 
 	cout << "Pontos de articulacao: ";
 
@@ -120,18 +94,99 @@ int main() {
 	return 0;
 }
 
-set<int> getPoisFromPersons(vector<Person>& persons){
-	set<int> pois;
+vector<Graph<int> > calculatePaths(vector<Person>& persons, int idStart, int idEnd, vector<vector<int> >& W){
+	vector<Graph<int> > graphs;
+	for(size_t i = 0;i < persons.size();i++){
+		Person p = persons[i];
+		vector<int> pPois = p.getPois();
+		pPois.push_back(idStart);
+		pPois.push_back(idEnd);
+		Graph<int> gp = createGraphUsingPois(pPois, W);
+
+		int factorAditive;
+		int graphToAdd = -1;
+		vector<int> vertixesToAdd;
+
+		vector<int> pathP = gp.getPathSalesmanProblem(idStart, idEnd);
+		int distanceP = calcDistOfPath(pathP, W);
+		factorAditive = distanceP;
+
+		for(size_t j = 0;j < graphs.size();j++){
+
+			Graph<int> gCalculated = graphs[j];
+			vector<int> pathOfGC = gCalculated.getPathSalesmanProblem(idStart, idEnd);
+			int distOriginal =calcDistOfPath(pathOfGC, W);
+			vector<Vertex<int> * > vp = gCalculated.getVertexSet();
+			vector<int> totalVertixes;
+			for(size_t k = 0;k < vp.size();k++){
+				totalVertixes.push_back(vp[k]->getInfo());
+			}
+			for(size_t k = 0;k < pPois.size();k++)
+				totalVertixes.push_back(pPois[k]);
+			Graph<int> newGraph = createGraphUsingPois(totalVertixes, W);
+
+			if(newGraph.isConnected() == false)
+				continue;
+
+			vector<int> pathWithAdd = gCalculated.getPathSalesmanProblem(idStart, idEnd);
+			int distWithAdd = calcDistOfPath(pathWithAdd, W);
+
+			if(distWithAdd-distOriginal < factorAditive){
+				factorAditive = distWithAdd-distOriginal;
+				graphToAdd = j;
+				vertixesToAdd = totalVertixes;
+			}
+		}
+
+		if(graphToAdd == -1){
+			graphs.push_back(gp);
+		}
+		else{
+			graphs.erase(graphs.begin()+graphToAdd);
+			Graph<int> newGraph = createGraphUsingPois(vertixesToAdd, W);
+			newGraph.getPathSalesmanProblem(idStart,idEnd);
+			graphs.push_back(newGraph);
+		}
+	}
+	return graphs;
+}
+
+int calcDistOfPath(vector<int> path, vector<vector<int> >& W){
+	int d = 0;
+	for(size_t i = 0;i < path.size();i++){
+		int weight = W[path[i]][path[i-1]];
+		d += weight;
+	}
+	return d;
+}
+
+Graph<int> createGraphUsingPois(vector<int>& pois, vector<vector<int> >& W){
+	Graph<int> g;
+	for(size_t k = 0;k < pois.size();k++)
+		g.addVertex(pois[k]);
+	for(size_t k = 0;k < pois.size();k++){
+		for(size_t w = 0;w < pois.size();w++){
+			int weight = W[k][w];
+			if(weight != 0 && weight != INT_INFINITY){
+				g.addEdge(k,w,weight);
+			}
+		}
+	}
+	return g;
+}
+
+vector<int> getPoisFromPersons(vector<Person>& persons){
+	vector<int> pois;
 	for(size_t i = 0;i < persons.size();i++){
 		vector<int> poisOfPerson = persons[i].getPois();
 		for(size_t j = 0;j < poisOfPerson.size();j++)
-			pois.insert(poisOfPerson[j]);
+			pois.push_back(poisOfPerson[j]);
 	}
 	return pois;
 }
 
-void addPoisToGraphViewer(GraphViewer *gv, set<int>& pois){
-	for (std::set<int>::iterator it=pois.begin(); it!=pois.end(); ++it)
+void addPoisToGraphViewer(GraphViewer *gv, vector<int>& pois){
+	for (std::vector<int>::iterator it=pois.begin(); it!=pois.end(); ++it)
 		gv->setVertexColor(*it, "BLUE");
 }
 
@@ -163,22 +218,6 @@ int readArrivalNode(){
 		else{
 			cout << "No invalido. Tente de novo\n";
 			cout << ">> ";
-		}
-	}
-}
-
-int readCapacityFromInput(){
-	string s;
-	int c;
-	while(1){
-		cout << "Capacidade dos autocarros: ";
-		getline(cin, s);
-		istringstream ss(s);
-		if(ss >> c){
-			return c;
-		}
-		else{
-			cout << "Capacidade invalida. Tente de novo.\n";
 		}
 	}
 }

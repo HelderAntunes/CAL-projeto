@@ -22,7 +22,7 @@ int readArrivalNode();
 int readStartNode();
 void addPoisToGraphViewer(GraphViewer *gv, set<int>& pois);
 set<int> getPoisFromPersons(vector<Person>& persons);
-vector<vector<Person> > agroupPersonsByTheirPois(vector<Person>& persons, int idStart, int idEnd, vector<vector<int> >& W);
+vector<vector<Person> > agroupPersonsByTheirPois(vector<Person>& persons);
 Graph<int> createGraphUsingPois(set<int>& pois, vector<vector<int> >& W);
 int calcDistOfPath(vector<int> path, vector<vector<int> >& W);
 vector<int> calculatePath(vector<Person>& persons, int idStart, int idEnd, vector<vector<int> >& W);
@@ -57,22 +57,30 @@ int main() {
 	pois.insert(idEnd);
 	gv->rearrange();
 
-	cout << "Caminho(s) gerado(s)(tambem visiveis pelo GraphViewerController):\n";
+	cout << "Caminho(s) gerado(s):\n";
 
 	g.floydWarshallShortestPath();
 	vector<vector<int> > W = g.getWeightBetweenAllVertexs();
+	vector<vector<Person> > groups = agroupPersonsByTheirPois(persons);
 
-	vector<int> path = calculatePath(persons, idStart, idEnd, W);
-	int distance = calcDistOfPath(path, W);
-	cout << "Caminho gerado\n";
-	for(size_t j = 0;j < path.size();j++){
-		cout << path[j];
-		if(j < path.size()-1)
-			cout << " -> ";
-		else
-			cout << "\n";
+	for(size_t i = 0;i < groups.size();i++){
+		vector<int> path = calculatePath(groups[i], idStart, idEnd, W);
+		int distance = calcDistOfPath(path, W);
+		cout << "Caminho gerado\n";
+		for(size_t j = 0;j < path.size();j++){
+			cout << path[j];
+			if(j < path.size()-1)
+				cout << " -> ";
+			else
+				cout << "\n";
+		}
+		cout << "Distancia percorrida: " << distance << endl;
+		cout << "Turistas neste caminho:\n";
+		for(size_t j = 0;j < groups[i].size();j++){
+			cout << groups[i][j].getName() << endl;
+		}
+		cout << endl;
 	}
-	cout << "Distancia percorrida: " << distance << endl << endl;
 
 	cout << "Pontos de articulacao: ";
 	cout << endl;
@@ -118,20 +126,20 @@ vector<int> calculatePath(vector<Person>& persons, int idStart, int idEnd, vecto
 	return path;
 }
 
-vector<vector<Person> > agroupPersonsByTheirPois(vector<Person>& persons, int idStart, int idEnd, vector<vector<int> >& W){
+vector<vector<Person> > agroupPersonsByTheirPois(vector<Person>& persons){
 	vector<vector<Person> > groups;
 	vector<Person> atualGroup;
 
 	atualGroup.push_back(persons[0]);
 	groups.push_back(atualGroup);
 
-	for(int i = 1;i < persons.size();i++){
+	for(size_t i = 1;i < persons.size();i++){
 		bool enteredInGroup = false;
 
-		for(int j = 0;j < groups.size();j++){
+		for(size_t j = 0;j < groups.size();j++){
 			atualGroup = groups[j];
 			bool isInGroup = true;
-			for(int k = 0;k < atualGroup.size();k++){
+			for(size_t k = 0;k < atualGroup.size();k++){
 				if(persons[i].isInSameGroup(atualGroup[k]) == false){
 					isInGroup = false;
 					break;

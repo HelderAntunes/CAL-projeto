@@ -27,9 +27,9 @@ public:
 	virtual ~MapReading(){};
 
 	void readMap(string nodesFlName, string roadsFlName, string edgesFlName);
-	void readEdgesFromFile(ifstream& ifs);
-	void readNodesFromFile(ifstream& ifs);
-	void readRoadsFromFile(ifstream& ifs);
+	void readEdgesFromFile(ifstream& ifs);		//EDGES
+	void readNodesFromFile(ifstream& ifs);		//NODES
+	void readRoadsFromFile(ifstream& ifs);		//ROADS
 
 	void sendDataToGraphViewer(GraphViewer *gv);
 	Graph<int> getGraph();

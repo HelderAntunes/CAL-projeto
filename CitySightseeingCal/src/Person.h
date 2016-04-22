@@ -38,6 +38,22 @@ public:
 		this->pois.insert(Poi);
 	}
 
+	bool isInSameGroup(Person p2){
+		int count = 0;
+		for(set<int>::iterator it = pois.begin();it != pois.end();it++)
+			for(set<int>::iterator it2 = p2.pois.begin();it2 != p2.pois.end();it2++)
+				if((*it) == (*it2)){
+					count++;
+					break;
+				}
+
+		double perc = (double)count / (double)pois.size();
+		if(perc >= 0.5)
+			return true;
+		else
+			return false;
+	}
+
 };
 
 #endif /* PERSON_H_ */

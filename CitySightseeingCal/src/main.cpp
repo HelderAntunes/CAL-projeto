@@ -22,7 +22,7 @@ int readArrivalNode();
 int readStartNode();
 void addPoisToGraphViewer(GraphViewer *gv, set<int>& pois);
 set<int> getPoisFromPersons(vector<Person>& persons);
-vector<vector<int> > calculatePaths(vector<Person>& persons, int idStart, int idEnd, vector<vector<int> >& W);
+vector<vector<Person> > agroupPersonsByTheirPois(vector<Person>& persons, int idStart, int idEnd, vector<vector<int> >& W);
 Graph<int> createGraphUsingPois(set<int>& pois, vector<vector<int> >& W);
 int calcDistOfPath(vector<int> path, vector<vector<int> >& W);
 vector<int> calculatePath(vector<Person>& persons, int idStart, int idEnd, vector<vector<int> >& W);
@@ -118,12 +118,41 @@ vector<int> calculatePath(vector<Person>& persons, int idStart, int idEnd, vecto
 	return path;
 }
 
-/**
- * this function should divide people in groups according their pois...
- */
-vector<vector<int> > calculatePaths(vector<Person>& persons, int idStart, int idEnd, vector<vector<int> >& W){
-	vector<vector<int> > graphs;
-	return graphs;
+vector<vector<Person> > agroupPersonsByTheirPois(vector<Person>& persons, int idStart, int idEnd, vector<vector<int> >& W){
+	vector<vector<Person> > groups;
+	vector<Person> atualGroup;
+
+	atualGroup.push_back(persons[0]);
+	groups.push_back(atualGroup);
+
+	for(int i = 1;i < persons.size();i++){
+		bool enteredInGroup = false;
+
+		for(int j = 0;j < groups.size();j++){
+			atualGroup = groups[j];
+			bool isInGroup = true;
+			for(int k = 0;k < atualGroup.size();k++){
+				if(persons[i].isInSameGroup(atualGroup[k]) == false){
+					isInGroup = false;
+					break;
+				}
+			}
+
+			if(isInGroup == true){
+				groups[j].push_back(persons[i]);
+				enteredInGroup = true;
+				break;
+			}
+		}
+
+		if(enteredInGroup == false){
+			vector<Person> newGroup;
+			newGroup.push_back(persons[i]);
+			groups.push_back(newGroup);
+		}
+	}
+
+	return groups;
 }
 
 int calcDistOfPath(vector<int> path, vector<vector<int> >& W){

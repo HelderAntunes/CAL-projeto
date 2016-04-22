@@ -9,6 +9,7 @@
 #define PERSON_H_
 
 #include <string>
+#include <set>
 
 using namespace std;
 
@@ -16,12 +17,11 @@ class Person {
 
 private:
 	string name;
-	vector<int> pois;
+	set<int> pois;
 
 public:
 	Person(string name){
 		this->name = name;
-		this->pois = pois;
 	}
 
 	virtual ~Person(){};
@@ -30,12 +30,12 @@ public:
 		return name;
 	}
 
-	vector<int> getPois(){
+	set<int> getPois(){
 		return pois;
 	}
 
 	void addPoi(int Poi){
-		pois.push_back(Poi);
+		this->pois.insert(Poi);
 	}
 
 };

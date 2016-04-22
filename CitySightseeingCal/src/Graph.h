@@ -12,6 +12,7 @@
 #include <algorithm>
 #include <climits>
 #include <stack>
+#include "Person.h"
 
 
 using namespace std;
@@ -150,6 +151,7 @@ class Graph {
 	void dfs(Vertex<T> *v, vector<T> &res) const;
 	vector<vector<int> > W;
 	vector<vector<int> > P;
+	vector<Person> persons;
 
 	//exercicio 5
 	int numCycles;
@@ -193,6 +195,8 @@ public:
 	bool isConnected();
 	void printSCC();
 	Graph<T> getReversedGraph();
+	void addPerson(Person p){persons.push_back(p);}
+	vector<Person> getPersons(){return persons;}
 
 };
 

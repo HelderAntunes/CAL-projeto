@@ -22,37 +22,22 @@ int readArrivalNode();
 int readStartNode();
 void addPoisToGraphViewer(GraphViewer *gv, set<int>& pois);
 set<int> getPoisFromPersons(vector<Person>& persons);
-vector<Graph<int> > calculatePaths(vector<Person>& persons, int idStart, int idEnd, vector<vector<int> >& W);
+vector<vector<int> > calculatePaths(vector<Person>& persons, int idStart, int idEnd, vector<vector<int> >& W);
 Graph<int> createGraphUsingPois(set<int>& pois, vector<vector<int> >& W);
 int calcDistOfPath(vector<int> path, vector<vector<int> >& W);
+vector<int> calculatePath(vector<Person>& persons, int idStart, int idEnd, vector<vector<int> >& W);
+void introduceTheProgram();
 
 int main() {
+
+	introduceTheProgram();
+
 	GraphViewer *gv = new GraphViewer(900, 600, false);
-	MapReading mr;
-	set<int> pois;
-	Graph<int> g;
-	vector<Person> persons;
-
-	cout << "Bem-vindo!\n";
-
-	cout << endl;
-	cout << "Para utilizar este programa precisa indicar 3 ficheiros gerados pelo OpenStreetMapsParser.\n";
-	cout << "	Ficheiro nodes.txt\n";
-	cout << "	Ficheiro edges.txt\n";
-	cout << "	Ficheiro roads.txt\n";
-	cout << "Precisa tambem do ficheiro\n"
-			"	persons.txt: informacao acerca das pessoas e seus pontos de interesse\n"
-			"Formatacao deste ficheiro:\n"
-			"nome_da_pessoa\n"
-			"poi1 poi2 poi3 ... poiN -1\n"
-			"...\n\n";
-	cout << endl;
-	cout << "Prima qualquer tecla para continuar..." << endl;
-	cout << endl;
-	getchar();
-
+	MapReading mr ;
 	mr.readMap("nodes.txt", "roads.txt", "edges.txt");
-	g = mr.getGraph();
+	set<int> pois;
+	Graph<int> g = mr.getGraph();;
+	vector<Person> persons;
 
 	gv->createWindow(900, 600);
 	gv->defineEdgeCurved(false);
@@ -71,104 +56,73 @@ int main() {
 	pois.insert(idStart);
 	pois.insert(idEnd);
 	gv->rearrange();
+
 	cout << "Caminho(s) gerado(s)(tambem visiveis pelo GraphViewerController):\n";
+
 	g.floydWarshallShortestPath();
 	vector<vector<int> > W = g.getWeightBetweenAllVertexs();
 
-	Graph<int> graphToTestConnectivity = createGraphUsingPois(pois, W);
-	if(graphToTestConnectivity.isConnected() == false){
-		cout << "Alguns pontos de interesse sao inacessiveis!!!" << endl;
-		cout << "Certifique-se que todos os POIs, no de partida e destino sao conexos entre si..." << endl;
-		return -1;
+	vector<int> path = calculatePath(persons, idStart, idEnd, W);
+	int distance = calcDistOfPath(path, W);
+	cout << "Caminho gerado\n";
+	for(size_t j = 0;j < path.size();j++){
+		cout << path[j];
+		if(j < path.size()-1)
+			cout << " -> ";
+		else
+			cout << "\n";
 	}
-	vector<Graph<int> > graphs = calculatePaths(persons, idStart, idEnd, W);
-	cout << "Caminhos gerados:\n";
-	for(size_t i = 0;i < graphs.size();i++){
-		cout << "Caminho " << i+1 << ":\n";
-		vector<int> path = graphs[i].getPathSalesmanProblem(idStart, idEnd);
-		int distance = calcDistOfPath(path, W);
-		for(size_t j = 0;j < path.size();j++){
-			cout << path[j];
-			if(j < path.size()-1)
-				cout << " -> ";
-			else
-				cout << "\n";
-		}
-		cout << "Distancia percorrida: " << distance << endl;
-		vector<Person> persons = graphs[i].getPersons();
-		cout << "Pessoas que vao por este caminho:\n";
-		for(size_t j = 0;j < persons.size();j++){
-			cout << persons[j].getName() << endl;
-		}
-	}
-	cout << "Pontos de articulacao: ";
+	cout << "Distancia percorrida: " << distance << endl << endl;
 
+	cout << "Pontos de articulacao: ";
 	cout << endl;
+
 	cout << "Prima qualquer tecla para terminar..." << endl;
 	getchar();
 
 	return 0;
 }
 
-vector<Graph<int> > calculatePaths(vector<Person>& persons, int idStart, int idEnd, vector<vector<int> >& W){
-	vector<Graph<int> > graphs;
-	for(size_t i = 0;i < persons.size();i++){
-		Person p = persons[i];
-		set<int> pPois = p.getPois();
-		pPois.insert(idStart);
-		pPois.insert(idEnd);
-		Graph<int> gp = createGraphUsingPois(pPois, W);
+void introduceTheProgram(){
+	cout << "Bem-vindo!\n";
+	cout << endl;
+	cout << "Para utilizar este programa precisa indicar 3 ficheiros gerados pelo OpenStreetMapsParser.\n";
+	cout << "	Ficheiro nodes.txt\n";
+	cout << "	Ficheiro edges.txt\n";
+	cout << "	Ficheiro roads.txt\n";
+	cout << "Precisa tambem do ficheiro\n"
+			"	persons.txt: informacao acerca das pessoas e seus pontos de interesse\n"
+			"Formatacao deste ficheiro:\n"
+			"nome_da_pessoa\n"
+			"poi1 poi2 poi3 ... poiN -1\n"
+			"...\n\n";
+	cout << endl;
+	cout << "Prima qualquer tecla para continuar..." << endl;
+	cout << endl;
+	getchar();
+}
 
-		int factorAditive;
-		int graphToAdd = -1;
-		set<int> vertixesToAdd;
+vector<int> calculatePath(vector<Person>& persons, int idStart, int idEnd, vector<vector<int> >& W){
+	set<int> pois = getPoisFromPersons(persons);
+	pois.insert(idStart);
+	pois.insert(idEnd);
+	Graph<int> graphWithPois = createGraphUsingPois(pois, W);
+	vector<int> path;
 
-		vector<int> pathP = gp.getPathSalesmanProblem(idStart, idEnd);
-		int distanceP = calcDistOfPath(pathP, W);
-		factorAditive = distanceP;
-
-		for(size_t j = 0;j < graphs.size();j++){
-			Graph<int> gCalculated = graphs[j];
-			vector<int> pathOfGC = gCalculated.getPathSalesmanProblem(idStart, idEnd);
-			int distOriginal = calcDistOfPath(pathOfGC, W);
-			vector<Vertex<int> * > vp = gCalculated.getVertexSet();
-			set<int> totalVertixes;
-			for(size_t k = 0;k < vp.size();k++){
-				totalVertixes.insert(vp[k]->getInfo());
-			}
-			for(set<int>::iterator k = pPois.begin();k != pPois.end();k++){
-				totalVertixes.insert(*k);
-			}
-			Graph<int> newGraph = createGraphUsingPois(totalVertixes, W);
-
-			if(newGraph.isConnected() == false)
-				continue;
-
-			vector<int> pathWithAdd = gCalculated.getPathSalesmanProblem(idStart, idEnd);
-			int distWithAdd = calcDistOfPath(pathWithAdd, W);
-
-			if(distWithAdd-distOriginal < factorAditive){
-				factorAditive = distWithAdd-distOriginal;
-				graphToAdd = j;
-				vertixesToAdd = totalVertixes;
-			}
-		}
-
-		if(graphToAdd == -1){
-			gp.addPerson(p);
-			graphs.push_back(gp);
-		}
-		else{
-			vector<Person> persons = graphs[graphToAdd].getPersons();
-			persons.push_back(p);
-			graphs.erase(graphs.begin()+graphToAdd);
-			Graph<int> newGraph = createGraphUsingPois(vertixesToAdd, W);
-			for(size_t j = 0;j < persons.size();j++)
-				newGraph.addPerson(persons[j]);
-			newGraph.getPathSalesmanProblem(idStart,idEnd);
-			graphs.push_back(newGraph);
-		}
+	if(graphWithPois.isConnected() == false){
+		cout << "Alguns pontos de interesse sao inacessives!!!\n";
+		return path;
 	}
+
+	path = graphWithPois.getPathSalesmanProblem(idStart, idEnd);
+	return path;
+}
+
+/**
+ * this function should divide people in groups according their pois...
+ */
+vector<vector<int> > calculatePaths(vector<Person>& persons, int idStart, int idEnd, vector<vector<int> >& W){
+	vector<vector<int> > graphs;
 	return graphs;
 }
 
@@ -186,14 +140,13 @@ Graph<int> createGraphUsingPois(set<int>& pois, vector<vector<int> >& W){
 	vector<int> poisV(pois.begin(), pois.end());
 	for(size_t k = 0;k < poisV.size();k++)
 		g.addVertex(poisV[k]);
-	for(size_t k = 0;k < poisV.size();k++){
+	for(size_t k = 0;k < poisV.size();k++)
 		for(size_t w = 0;w < pois.size();w++){
 			int weight = W[poisV[k]][poisV[w]];
 			if(weight != 0 && weight != INT_INFINITY){
 				g.addEdge(poisV[k],poisV[w],weight);
 			}
 		}
-	}
 	return g;
 }
 

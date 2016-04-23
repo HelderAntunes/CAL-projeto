@@ -369,7 +369,9 @@ void Graph<T>::printSCC(){
 		stack.pop();
 
 		if(gr.getVertex(v)->visited == false){
+			cout << "{ ";
 			gr.printOneComponent_SCC(gr.getVertex(v));
+			cout << "}";
 			cout << endl;
 		}
 	}

@@ -27,6 +27,9 @@ Graph<int> createGraphUsingPois(set<int>& pois, vector<vector<int> >& W);
 int calcDistOfPath(vector<int> path, vector<vector<int> >& W);
 vector<int> calculatePath(vector<Person>& persons, int idStart, int idEnd, vector<vector<int> >& W);
 void introduceTheProgram();
+void printTourists(vector<Person>& persons);
+void printPath(vector<int>& path, Graph<int>& g);
+
 
 int main() {
 
@@ -57,30 +60,25 @@ int main() {
 	pois.insert(idEnd);
 	gv->rearrange();
 
-	cout << "Caminho(s) gerado(s):\n\n";
+	cout << "\nCaminho(s) gerado(s):\n\n";
 
 	g.floydWarshallShortestPath();
 	vector<vector<int> > W = g.getWeightBetweenAllVertexs();
 	vector<vector<Person> > groups = agroupPersonsByTheirPois(persons);
 
 	for(size_t i = 0;i < groups.size();i++){
+
 		vector<int> path = calculatePath(groups[i], idStart, idEnd, W);
 		int distance = calcDistOfPath(path, W);
+
 		cout << "Caminho gerado " << i+1 << endl;
-		for(size_t j = 0;j < path.size()-1;j++){
-			vector<int> subPath = g.getfloydWarshallPath(path[j], path[j+1]);
-			for(size_t k = 0;k < subPath.size();k++){
-				if(j > 0 && k == 0)
-					continue;
-				cout << subPath[k] << "  ";
-			}
-		}
+		printPath(path, g);
 		cout << endl;
+
 		cout << "Distancia percorrida: " << distance << endl;
+
 		cout << "Turistas neste caminho:\n";
-		for(size_t j = 0;j < groups[i].size();j++){
-			cout << groups[i][j].getName() << endl;
-		}
+		printTourists(groups[i]);
 		cout << endl;
 	}
 
@@ -92,6 +90,22 @@ int main() {
 	getchar();
 
 	return 0;
+}
+
+void printPath(vector<int>& path, Graph<int>& g){
+	for(size_t j = 0;j < path.size()-1;j++){
+		vector<int> subPath = g.getfloydWarshallPath(path[j], path[j+1]);
+		for(size_t k = 0;k < subPath.size();k++){
+			if(j > 0 && k == 0)
+				continue;
+			cout << subPath[k] << "  ";
+		}
+	}
+}
+
+void printTourists(vector<Person>& persons){
+	for(size_t j = 0;j < persons.size();j++)
+		cout << persons[j].getName() << endl;
 }
 
 void introduceTheProgram(){
@@ -183,9 +197,8 @@ Graph<int> createGraphUsingPois(set<int>& pois, vector<vector<int> >& W){
 	for(size_t k = 0;k < poisV.size();k++)
 		for(size_t w = 0;w < pois.size();w++){
 			int weight = W[poisV[k]][poisV[w]];
-			if(weight != 0 && weight != INT_INFINITY){
+			if(weight != 0 && weight != INT_INFINITY)
 				g.addEdge(poisV[k],poisV[w],weight);
-			}
 		}
 	return g;
 }

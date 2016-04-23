@@ -57,7 +57,7 @@ int main() {
 	pois.insert(idEnd);
 	gv->rearrange();
 
-	cout << "Caminho(s) gerado(s):\n";
+	cout << "Caminho(s) gerado(s):\n\n";
 
 	g.floydWarshallShortestPath();
 	vector<vector<int> > W = g.getWeightBetweenAllVertexs();
@@ -66,14 +66,16 @@ int main() {
 	for(size_t i = 0;i < groups.size();i++){
 		vector<int> path = calculatePath(groups[i], idStart, idEnd, W);
 		int distance = calcDistOfPath(path, W);
-		cout << "Caminho gerado\n";
-		for(size_t j = 0;j < path.size();j++){
-			cout << path[j];
-			if(j < path.size()-1)
-				cout << " -> ";
-			else
-				cout << "\n";
+		cout << "Caminho gerado " << i+1 << endl;
+		for(size_t j = 0;j < path.size()-1;j++){
+			vector<int> subPath = g.getfloydWarshallPath(path[j], path[j+1]);
+			for(size_t k = 0;k < subPath.size();k++){
+				if(j > 0 && k == 0)
+					continue;
+				cout << subPath[k] << "  ";
+			}
 		}
+		cout << endl;
 		cout << "Distancia percorrida: " << distance << endl;
 		cout << "Turistas neste caminho:\n";
 		for(size_t j = 0;j < groups[i].size();j++){
@@ -82,7 +84,8 @@ int main() {
 		cout << endl;
 	}
 
-	cout << "Pontos de articulacao: ";
+	cout << "Grupos fortemente conexos: ";
+	g.printSCC();
 	cout << endl;
 
 	cout << "Prima qualquer tecla para terminar..." << endl;

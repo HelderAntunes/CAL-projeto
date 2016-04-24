@@ -25,10 +25,13 @@ set<int> getPoisFromPersons(vector<Person>& persons);
 vector<vector<Person> > agroupPersonsByTheirPois(vector<Person>& persons);
 Graph<int> createGraphUsingPois(set<int>& pois, vector<vector<int> >& W);
 int calcDistOfPath(vector<int> path, vector<vector<int> >& W);
-vector<int> calculatePath(vector<Person>& persons, int idStart, int idEnd, vector<vector<int> >& W);
+vector<int> calculatePath(vector<Person>& persons, int idStart, int idEnd, vector<vector<int> >& W, bool& graphIsConnected);
 void introduceTheProgram();
 void printTourists(vector<Person>& persons);
 void printPath(vector<int>& path, Graph<int>& g);
+vector<int> getArticulationPoints(Graph<int>& g, int idStart);
+vector<int> getPointsOfMapThatCanInterruptThePath(vector<int>& path, vector<int>& artPoints);
+
 
 
 int main() {
@@ -65,24 +68,41 @@ int main() {
 	g.floydWarshallShortestPath();
 	vector<vector<int> > W = g.getWeightBetweenAllVertexs();
 	vector<vector<Person> > groups = agroupPersonsByTheirPois(persons);
+	vector<int> articulationPoints = getArticulationPoints(g, idStart);
 
 	for(size_t i = 0;i < groups.size();i++){
+		cout << "Grupo " << i+1 << endl;
+		bool poisAreConnected = true;
+		vector<int> path = calculatePath(groups[i], idStart, idEnd, W, poisAreConnected);
 
-		vector<int> path = calculatePath(groups[i], idStart, idEnd, W);
+		if(poisAreConnected == false){
+			cout << "Turistas no caminho:" << endl;
+			printTourists(groups[i]);
+			continue;
+		}
+
 		int distance = calcDistOfPath(path, W);
 
-		cout << "Caminho gerado " << i+1 << endl;
+		cout << "Caminho gerado" << endl;
 		printPath(path, g);
 		cout << endl;
 
-		cout << "Distancia percorrida: " << distance << endl;
+		cout << "Distancia percorrida: " << distance << endl << endl;
 
-		cout << "Turistas neste caminho:\n";
+		vector<int> articulationPointsInPath = getPointsOfMapThatCanInterruptThePath(path, articulationPoints);
+		if(articulationPointsInPath.size() > 0){
+			cout << "Pontos do caminho que podem interromper a viagem: ";
+			for(size_t j = 0;j < articulationPointsInPath.size();j++)
+				cout << articulationPointsInPath[j] << "  ";
+			cout << endl << endl;
+		}
+
+		cout << "Turistas no grupo:" << endl;
 		printTourists(groups[i]);
 		cout << endl;
 	}
 
-	cout << "Grupos fortemente conexos: ";
+	cout << "Pontos do mapa com forte conectividade: \n";
 	g.printSCC();
 	cout << endl;
 
@@ -90,6 +110,26 @@ int main() {
 	getchar();
 
 	return 0;
+}
+
+vector<int> getPointsOfMapThatCanInterruptThePath(vector<int>& path, vector<int>& artPoints){
+	set<int> ansSet;
+	for(size_t i = 0;i < path.size();i++)
+		for(size_t j = 0;j < artPoints.size();j++)
+			if(path[i] == artPoints[j])
+				ansSet.insert(path[i]);
+	vector<int> ans(ansSet.begin(), ansSet.end());
+	return ans;
+}
+
+vector<int> getArticulationPoints(Graph<int>& g, int idStart){
+	vector<int> artPoints;
+	g.findArt(idStart, artPoints);
+	for(size_t i = 0;i < artPoints.size();i++)
+		if(artPoints[i] == idStart)
+			artPoints.erase(artPoints.begin()+i);
+
+	return artPoints;
 }
 
 void printPath(vector<int>& path, Graph<int>& g){
@@ -121,13 +161,12 @@ void introduceTheProgram(){
 			"nome_da_pessoa\n"
 			"poi1 poi2 poi3 ... poiN -1\n"
 			"...\n\n";
-	cout << endl;
 	cout << "Prima qualquer tecla para continuar..." << endl;
 	cout << endl;
 	getchar();
 }
 
-vector<int> calculatePath(vector<Person>& persons, int idStart, int idEnd, vector<vector<int> >& W){
+vector<int> calculatePath(vector<Person>& persons, int idStart, int idEnd, vector<vector<int> >& W, bool& graphIsConnected){
 	set<int> pois = getPoisFromPersons(persons);
 	pois.insert(idStart);
 	pois.insert(idEnd);
@@ -136,6 +175,7 @@ vector<int> calculatePath(vector<Person>& persons, int idStart, int idEnd, vecto
 
 	if(graphWithPois.isConnected() == false){
 		cout << "Alguns pontos de interesse sao inacessives!!!\n";
+		graphIsConnected = false;
 		return path;
 	}
 
@@ -257,17 +297,13 @@ vector<Person> readPersonsFromFile(string fileName){
 	while(1){
 		int poi;
 		getline(ifsPersons, s);
-		cout << s  << endl;
-		if(ifsPersons.eof() == true || s == ""){
-
+		if(ifsPersons.eof() == true || s == "")
 			break;
-		}
 		Person p(s);
 		while(1){
 			ifsPersons >> poi;
-			if(poi == -1){
+			if(poi == -1)
 				break;
-			}
 			p.addPoi(poi);
 		}
 		ifsPersons.ignore();

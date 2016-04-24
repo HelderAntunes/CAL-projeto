@@ -1,1 +1,41 @@
-1;Rua 1;True
+217344337;Rua de Mouzinho da Silveira;True
+26207889;Rua da Bolsa;False
+39670043;Rua de Tomás Gonzaga;False
+34684086;Rua de São João;False
+39670022;Rua Francisco da Rocha Soares;False
+112448957;Rua de São João;False
+26207858;Rua da Fonte Taurina;False
+13278020;Rua do Infante Dom Henrique;True
+216891254;Rua de Mouzinho da Silveira;True
+13278159;Rua Clube Fluvial Portuense;True
+211292806;;True
+226921952;;False
+226908041;;False
+226908049;Rua do Infante Dom Henrique;False
+226912646;;False
+12300169;Rua Ferreira Borges;False
+226921951;;False
+226921792;Rua da Bolsa;True
+210365864;Rua da Bainharia;False
+210507317;Rua de Santa Ana;True
+211119460;;False
+211122347;Praça da Ribeira;False
+211292798;Rua de Belomonte;False
+211297737;;False
+211297746;;False
+211297742;Largo da Esperança;False
+211297734;Largo de São João Novo;False
+112631100;Rua de São João Novo;False
+26207794;Rua da Vitória;False
+216274195;;False
+211317181;;False
+96151239;Rua Nova da Alfândega;True
+211119459;Largo de São Domingos;True
+12544650;Túnel da Ribeira;True
+240124257;;True
+211119461;;True
+28618235;Rua das Taipas;True
+110334887;Rua de Belomonte;True
+26207885;Rua de O Comércio do Porto;False
+374346168;Largo de São Domingos;True
+210365861;Travessa da Bainharia;False

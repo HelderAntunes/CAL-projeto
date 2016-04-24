@@ -12,7 +12,6 @@
 #include <algorithm>
 #include <climits>
 #include <stack>
-#include "Person.h"
 
 
 using namespace std;
@@ -39,6 +38,9 @@ class Vertex {
 	bool addedToHeap;
 	int indegree;
 	int dist;
+	int low;
+	int num;
+	Vertex<T>* parent = NULL;
 public:
 
 	Vertex(T in);
@@ -151,7 +153,7 @@ class Graph {
 	void dfs(Vertex<T> *v, vector<T> &res) const;
 	vector<vector<int> > W;
 	vector<vector<int> > P;
-	vector<Person> persons;
+	int counter;
 
 	//exercicio 5
 	int numCycles;
@@ -192,13 +194,49 @@ public:
 	vector<vector<T> > getWeightBetweenAllVertexs();
 	vector<T> getPathSalesmanProblem(T idStart,T idEnd);
 	void salesmanProblemAux(Vertex<T> *vertexToProcess,Vertex<T> *endVertex, vector<T> &res, int numberEdgesVisited);
+
 	bool isConnected();
 	void printSCC();
 	Graph<T> getReversedGraph();
-	void addPerson(Person p){persons.push_back(p);}
-	vector<Person> getPersons(){return persons;}
+
+	void findArt(T info, vector<T>& artNodes);
+	void findArtAux(Vertex<T>* v, vector<T>& artNodes);
 
 };
+
+template <class T>
+void Graph<T>::findArt(T info, vector<T>& artNodes){
+	for(size_t i = 0;i < vertexSet.size();i++)
+		vertexSet[i]->visited = false;
+	Vertex<T>* v = this->getVertex(info);
+	counter = 1;
+	findArtAux(v, artNodes);
+}
+
+template <class T>
+void Graph<T>::findArtAux(Vertex<T>* v, vector<T>& artNodes){
+	v->visited = true;
+	v->num = v->low = counter++;
+	for(size_t j = 0;j < v->adj.size();j++){
+		Vertex<T>* w = v->adj[j].dest;
+		if(w->visited == false){
+			w->parent = v;
+			findArtAux(w, artNodes);
+			if(w->low >= v->num){
+				artNodes.push_back(v->info);
+			}
+			v->low = min(v->low, w->low);
+		}
+		else{
+			if(v->parent != w){
+				v->low = min(v->low, w->num);
+			}
+		}
+	}
+
+}
+
+
 
 
 template <class T>
@@ -369,9 +407,7 @@ void Graph<T>::printSCC(){
 		stack.pop();
 
 		if(gr.getVertex(v)->visited == false){
-			cout << "{ ";
 			gr.printOneComponent_SCC(gr.getVertex(v));
-			cout << "}";
 			cout << endl;
 		}
 	}
@@ -432,7 +468,6 @@ vector<T> Graph<T>::getPathSalesmanProblem(T idStart,T idEnd){
 	Vertex<T> *v = getVertex(idStart);
 	Vertex<T> *x = getVertex(idEnd);
 	salesmanProblemAux(v, x, res, 0);
-
 	return res;
 }
 

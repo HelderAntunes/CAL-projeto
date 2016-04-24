@@ -257,13 +257,17 @@ vector<Person> readPersonsFromFile(string fileName){
 	while(1){
 		int poi;
 		getline(ifsPersons, s);
-		if(ifsPersons.eof() == true)
+		cout << s  << endl;
+		if(ifsPersons.eof() == true || s == ""){
+
 			break;
+		}
 		Person p(s);
 		while(1){
 			ifsPersons >> poi;
-			if(poi == -1)
+			if(poi == -1){
 				break;
+			}
 			p.addPoi(poi);
 		}
 		ifsPersons.ignore();

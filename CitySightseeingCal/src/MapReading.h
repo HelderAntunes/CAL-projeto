@@ -30,7 +30,7 @@ public:
 	void readEdgesFromFile(ifstream& ifs);		//EDGES
 	void readNodesFromFile(ifstream& ifs);		//NODES
 	void readRoadsFromFile(ifstream& ifs);		//ROADS
-
+	map<int, pair<int,int> > getEdges();
 	void sendDataToGraphViewer(GraphViewer *gv);
 	Graph<int> getGraph();
 

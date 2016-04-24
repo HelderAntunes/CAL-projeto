@@ -28,10 +28,10 @@ int calcDistOfPath(vector<int> path, vector<vector<int> >& W);
 vector<int> calculatePath(vector<Person>& persons, int idStart, int idEnd, vector<vector<int> >& W, bool& graphIsConnected);
 void introduceTheProgram();
 void printTourists(vector<Person>& persons);
-void printPath(vector<int>& path, Graph<int>& g);
+vector<int> printPath(vector<int>& path, Graph<int>& g);
 vector<int> getArticulationPoints(Graph<int>& g, int idStart);
 vector<int> getPointsOfMapThatCanInterruptThePath(vector<int>& path, vector<int>& artPoints);
-
+void printColorEdges(GraphViewer *gv, map<int, pair<int,int> > edges, vector<int> allPath, int val);
 
 
 int main() {
@@ -42,7 +42,7 @@ int main() {
 	MapReading mr ;
 	mr.readMap("nodes.txt", "roads.txt", "edges.txt");
 	set<int> pois;
-	Graph<int> g = mr.getGraph();;
+	Graph<int> g = mr.getGraph();
 	vector<Person> persons;
 
 	gv->createWindow(900, 600);
@@ -84,7 +84,9 @@ int main() {
 		int distance = calcDistOfPath(path, W);
 
 		cout << "Caminho gerado" << endl;
-		printPath(path, g);
+		vector<int> allPath = printPath(path, g);
+		printColorEdges(gv, mr.getEdges(),allPath, i);
+		gv->rearrange();
 		cout << endl;
 
 		cout << "Distancia percorrida: " << distance << endl << endl;
@@ -105,6 +107,7 @@ int main() {
 	cout << "Pontos do mapa com forte conectividade: \n";
 	g.printSCC();
 	cout << endl;
+
 
 	cout << "Prima qualquer tecla para terminar..." << endl;
 	getchar();
@@ -132,15 +135,19 @@ vector<int> getArticulationPoints(Graph<int>& g, int idStart){
 	return artPoints;
 }
 
-void printPath(vector<int>& path, Graph<int>& g){
+vector<int> printPath(vector<int>& path, Graph<int>& g){
+	vector<int> allPath;
 	for(size_t j = 0;j < path.size()-1;j++){
 		vector<int> subPath = g.getfloydWarshallPath(path[j], path[j+1]);
 		for(size_t k = 0;k < subPath.size();k++){
 			if(j > 0 && k == 0)
 				continue;
 			cout << subPath[k] << "  ";
+			allPath.push_back(subPath[k]);
 		}
+
 	}
+	return allPath;
 }
 
 void printTourists(vector<Person>& persons){
@@ -166,6 +173,7 @@ void introduceTheProgram(){
 	getchar();
 }
 
+
 vector<int> calculatePath(vector<Person>& persons, int idStart, int idEnd, vector<vector<int> >& W, bool& graphIsConnected){
 	set<int> pois = getPoisFromPersons(persons);
 	pois.insert(idStart);
@@ -178,6 +186,7 @@ vector<int> calculatePath(vector<Person>& persons, int idStart, int idEnd, vecto
 		graphIsConnected = false;
 		return path;
 	}
+
 
 	path = graphWithPois.getPathSalesmanProblem(idStart, idEnd);
 	return path;
@@ -257,6 +266,26 @@ void addPoisToGraphViewer(GraphViewer *gv, set<int>& pois){
 	for (std::set<int>::iterator it=pois.begin(); it!=pois.end(); ++it)
 		gv->setVertexColor(*it, "BLUE");
 }
+
+void printColorEdges(GraphViewer *gv, map<int, pair<int,int> > edges, vector<int> allPath, int val){
+
+	vector<string> cores;
+	cores.push_back("RED");
+	cores.push_back("GREEN");
+	cores.push_back("ORANGE");
+	cores.push_back("PURPLE");
+	cores.push_back("BROWN");
+	cores.push_back("YELLOW");
+	cores.push_back("PINK");
+
+	for (size_t i = 0; i < allPath.size() - 1; ++i) {
+		for(size_t j = 0; j < edges.size(); j++){
+			if(edges[j].first == allPath[i] && edges[j].second == allPath[i + 1])
+				gv->setEdgeColor(j, cores[val]);
+		}
+	}
+}
+
 
 int readStartNode(){
 	string no;

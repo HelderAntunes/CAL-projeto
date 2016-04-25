@@ -12,6 +12,7 @@
 #include <algorithm>
 #include <climits>
 #include <stack>
+#include <set>
 
 
 using namespace std;
@@ -162,7 +163,7 @@ class Graph {
 	void getPathTo(Vertex<T> *origin, list<T> &res);
 
 	void putInStackByPosOrder_SCC(Vertex<T>* v, stack<T>& stack);
-	void printOneComponent_SCC(Vertex<T>* v);
+	void printOneComponent_SCC(Vertex<T>* v, set<T>& component);
 
 public:
 	bool addVertex(const T &in);
@@ -196,7 +197,7 @@ public:
 	void salesmanProblemAux(Vertex<T> *vertexToProcess,Vertex<T> *endVertex, vector<T> &res, int numberEdgesVisited);
 
 	bool isConnected();
-	void printSCC();
+	vector<set<T> > getStrongestConnectedComponents();
 	Graph<T> getReversedGraph();
 
 	void findArt(T info, vector<T>& artNodes);
@@ -381,7 +382,8 @@ void Graph<T>::dfs(Vertex<T> *v,vector<T> &res) const {
 }
 
 template <class T>
-void Graph<T>::printSCC(){
+vector<set<T> > Graph<T>::getStrongestConnectedComponents(){
+	vector<set<T> > ans;
 	stack<T> stack;
 
 	typename vector<Vertex<T>*>::const_iterator it= vertexSet.begin();
@@ -407,20 +409,22 @@ void Graph<T>::printSCC(){
 		stack.pop();
 
 		if(gr.getVertex(v)->visited == false){
-			gr.printOneComponent_SCC(gr.getVertex(v));
-			cout << endl;
+			set<T> component;
+			gr.printOneComponent_SCC(gr.getVertex(v), component);
+			ans.push_back(component);
 		}
 	}
+	return ans;
 }
 
 template <class T>
-void Graph<T>::printOneComponent_SCC(Vertex<T>* v){
+void Graph<T>::printOneComponent_SCC(Vertex<T>* v, set<T>& component){
 	v->visited = true;
-	cout << v->info << "  ";
+	component.insert(v->info);
 
 	for(int i = 0;i < v->adj.size();i++){
 		if(v->adj[i].dest->visited == false){
-			printOneComponent_SCC(v->adj[i].dest);
+			printOneComponent_SCC(v->adj[i].dest, component);
 		}
 	}
 }

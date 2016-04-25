@@ -8,6 +8,7 @@
 #include <time.h>
 #include <map>
 #include <string>
+#include <iomanip>
 #include <algorithm>
 #include <set>
 #include "Graph.h"
@@ -22,7 +23,7 @@ int readArrivalNode();
 int readStartNode();
 void addPoisToGraphViewer(GraphViewer *gv, set<int>& pois);
 set<int> getPoisFromPersons(vector<Person>& persons);
-vector<vector<Person> > agroupPersonsByTheirPois(vector<Person>& persons);
+vector<vector<Person> > agroupPersonsByTheirPois(vector<Person>& persons, vector<set<int> > strongestComponents);
 Graph<int> createGraphUsingPois(set<int>& pois, vector<vector<int> >& W);
 int calcDistOfPath(vector<int> path, vector<vector<int> >& W);
 vector<int> calculatePath(vector<Person>& persons, int idStart, int idEnd, vector<vector<int> >& W, bool& graphIsConnected);
@@ -33,7 +34,7 @@ void printPath(vector<int>& path);
 vector<int> getArticulationPoints(Graph<int>& g, int idStart);
 vector<int> getPointsOfMapThatCanInterruptThePath(vector<int>& path, vector<int>& artPoints);
 void printColorEdges(GraphViewer *gv, map<int, pair<int,int> >& edges, map<int, pair<double,bool> >& edgesProperties, vector<int> allPath, int val);
-
+void printStrongestComponents(vector<set<int> > strongestComponents);
 
 int main() {
 
@@ -68,7 +69,8 @@ int main() {
 
 	g.floydWarshallShortestPath();
 	vector<vector<int> > W = g.getWeightBetweenAllVertexs();
-	vector<vector<Person> > groups = agroupPersonsByTheirPois(persons);
+	vector<set<int> > strongestComponents = g.getStrongestConnectedComponents();
+	vector<vector<Person> > groups = agroupPersonsByTheirPois(persons, strongestComponents);
 	vector<int> articulationPoints = getArticulationPoints(g, idStart);
 
 	for(size_t i = 0;i < groups.size();i++){
@@ -106,16 +108,37 @@ int main() {
 		cout << endl;
 	}
 
-	cout << "Pontos do mapa com forte conectividade: \n";
-	g.printSCC();
-	cout << endl;
-
+	printStrongestComponents(strongestComponents);
 
 	cout << "Prima qualquer tecla para terminar..." << endl;
 	getchar();
 
 	return 0;
 }
+
+void printStrongestComponents(vector<set<int> > strongestComponents){
+	cout << "Pontos do mapa com forte conectividade, caso seja preciso alterar a rota :) \n";
+	for(size_t i = 0;i < strongestComponents.size();i++){
+		set<int> component = strongestComponents[i];
+		cout << "{";
+		int count = 1;
+		for(set<int>::iterator j = component.begin();j != component.end();j++){
+			if(j == component.begin())
+				cout << setw(4) << (*j);
+			else
+				cout << setw(5) << (*j);
+			if(count%11 == 0)
+				cout << endl;
+			else
+				cout << " ";
+			count++;
+		}
+		cout << "}";
+		cout << endl;
+	}
+	cout << endl;
+}
+
 vector<int> getAllPath(vector<int>& path, Graph<int>& g){
 	vector<int> allPath;
 	for(size_t j = 0;j < path.size()-1;j++){
@@ -198,10 +221,10 @@ vector<int> calculatePath(vector<Person>& persons, int idStart, int idEnd, vecto
 	return path;
 }
 
-vector<vector<Person> > agroupPersonsByTheirPois(vector<Person>& persons){
+vector<vector<Person> > agroupPersonsByTheirPois(vector<Person>& persons, vector<set<int> > strongestComponents){
 	vector<vector<Person> > groups;
-	vector<Person> atualGroup;
 
+	vector<Person> atualGroup;
 	atualGroup.push_back(persons[0]);
 	groups.push_back(atualGroup);
 
@@ -210,10 +233,11 @@ vector<vector<Person> > agroupPersonsByTheirPois(vector<Person>& persons){
 
 		for(size_t j = 0;j < groups.size();j++){
 			atualGroup = groups[j];
-			bool isInGroup = true;
+			bool isInGroup = false;
+
 			for(size_t k = 0;k < atualGroup.size();k++){
-				if(persons[i].isInSameGroup(atualGroup[k]) == false){
-					isInGroup = false;
+				if(persons[i].isInSameGroup(atualGroup[k], strongestComponents) == true){
+					isInGroup = true;
 					break;
 				}
 			}
@@ -283,22 +307,15 @@ void printColorEdges(GraphViewer *gv, map<int, pair<int,int> >& edges, map<int, 
 	cores.push_back("BROWN");
 	cores.push_back("YELLOW");
 	cores.push_back("PINK");
-	cout << "//////////////////\n";
-	for (size_t i = 0; i < allPath.size() - 1; ++i) {
-		for(size_t j = 0; j < edges.size(); j++){
-			if(edges[j].first == allPath[i] && edges[j].second == allPath[i + 1]){
-				cout << allPath[i] << " " << edges[j].second << endl;
-				gv->setEdgeColor(j, cores[val%7]);
-			}
-			if(edgesProperties[j].second == true){
-				if(edges[j].second == allPath[i] && edges[j].first == allPath[i + 1]){
-					gv->setEdgeColor(j, cores[val%7]);
-				}
-			}
 
+	for (size_t i = 0; i < allPath.size() - 1; ++i)
+		for(size_t j = 0; j < edges.size(); j++){
+			if(edges[j].first == allPath[i] && edges[j].second == allPath[i + 1])
+				gv->setEdgeColor(j, cores[val%7]);
+			if(edgesProperties[j].second == true)
+				if(edges[j].second == allPath[i] && edges[j].first == allPath[i + 1])
+					gv->setEdgeColor(j, cores[val%7]);
 		}
-	}
-	cout << "//////////////////\n";
 }
 
 

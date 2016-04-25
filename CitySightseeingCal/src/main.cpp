@@ -120,6 +120,9 @@ void printStrongestComponents(vector<set<int> > strongestComponents){
 	cout << "Pontos do mapa com forte conectividade, caso seja preciso alterar a rota :) \n";
 	for(size_t i = 0;i < strongestComponents.size();i++){
 		set<int> component = strongestComponents[i];
+		if(component.size() == 1){
+			continue;
+		}
 		cout << "{";
 		int count = 1;
 		for(set<int>::iterator j = component.begin();j != component.end();j++){

@@ -28,10 +28,11 @@ int calcDistOfPath(vector<int> path, vector<vector<int> >& W);
 vector<int> calculatePath(vector<Person>& persons, int idStart, int idEnd, vector<vector<int> >& W, bool& graphIsConnected);
 void introduceTheProgram();
 void printTourists(vector<Person>& persons);
-vector<int> printPath(vector<int>& path, Graph<int>& g);
+vector<int> getAllPath(vector<int>& path, Graph<int>& g);
+void printPath(vector<int>& path);
 vector<int> getArticulationPoints(Graph<int>& g, int idStart);
 vector<int> getPointsOfMapThatCanInterruptThePath(vector<int>& path, vector<int>& artPoints);
-void printColorEdges(GraphViewer *gv, map<int, pair<int,int> > edges, vector<int> allPath, int val);
+void printColorEdges(GraphViewer *gv, map<int, pair<int,int> >& edges, map<int, pair<double,bool> >& edgesProperties, vector<int> allPath, int val);
 
 
 int main() {
@@ -84,8 +85,9 @@ int main() {
 		int distance = calcDistOfPath(path, W);
 
 		cout << "Caminho gerado" << endl;
-		vector<int> allPath = printPath(path, g);
-		printColorEdges(gv, mr.getEdges(),allPath, i);
+		vector<int> allPath = getAllPath(path, g);
+		printPath(allPath);
+		printColorEdges(gv, mr.getEdges(), mr.getEdgesProperties(), allPath, i);
 		gv->rearrange();
 		cout << endl;
 
@@ -114,6 +116,19 @@ int main() {
 
 	return 0;
 }
+vector<int> getAllPath(vector<int>& path, Graph<int>& g){
+	vector<int> allPath;
+	for(size_t j = 0;j < path.size()-1;j++){
+		vector<int> subPath = g.getfloydWarshallPath(path[j], path[j+1]);
+		for(size_t k = 0;k < subPath.size();k++){
+			if(j > 0 && k == 0)
+				continue;
+			allPath.push_back(subPath[k]);
+		}
+
+	}
+	return allPath;
+}
 
 vector<int> getPointsOfMapThatCanInterruptThePath(vector<int>& path, vector<int>& artPoints){
 	set<int> ansSet;
@@ -135,19 +150,10 @@ vector<int> getArticulationPoints(Graph<int>& g, int idStart){
 	return artPoints;
 }
 
-vector<int> printPath(vector<int>& path, Graph<int>& g){
-	vector<int> allPath;
-	for(size_t j = 0;j < path.size()-1;j++){
-		vector<int> subPath = g.getfloydWarshallPath(path[j], path[j+1]);
-		for(size_t k = 0;k < subPath.size();k++){
-			if(j > 0 && k == 0)
-				continue;
-			cout << subPath[k] << "  ";
-			allPath.push_back(subPath[k]);
-		}
-
-	}
-	return allPath;
+void printPath(vector<int>& path){
+	for(size_t i = 0;i < path.size();i++)
+		cout << path[i] << " ";
+	cout << endl;
 }
 
 void printTourists(vector<Person>& persons){
@@ -267,7 +273,7 @@ void addPoisToGraphViewer(GraphViewer *gv, set<int>& pois){
 		gv->setVertexColor(*it, "BLUE");
 }
 
-void printColorEdges(GraphViewer *gv, map<int, pair<int,int> > edges, vector<int> allPath, int val){
+void printColorEdges(GraphViewer *gv, map<int, pair<int,int> >& edges, map<int, pair<double,bool> >& edgesProperties, vector<int> allPath, int val){
 
 	vector<string> cores;
 	cores.push_back("RED");
@@ -277,13 +283,22 @@ void printColorEdges(GraphViewer *gv, map<int, pair<int,int> > edges, vector<int
 	cores.push_back("BROWN");
 	cores.push_back("YELLOW");
 	cores.push_back("PINK");
-
+	cout << "//////////////////\n";
 	for (size_t i = 0; i < allPath.size() - 1; ++i) {
 		for(size_t j = 0; j < edges.size(); j++){
-			if(edges[j].first == allPath[i] && edges[j].second == allPath[i + 1])
-				gv->setEdgeColor(j, cores[val]);
+			if(edges[j].first == allPath[i] && edges[j].second == allPath[i + 1]){
+				cout << allPath[i] << " " << edges[j].second << endl;
+				gv->setEdgeColor(j, cores[val%7]);
+			}
+			if(edgesProperties[j].second == true){
+				if(edges[j].second == allPath[i] && edges[j].first == allPath[i + 1]){
+					gv->setEdgeColor(j, cores[val%7]);
+				}
+			}
+
 		}
 	}
+	cout << "//////////////////\n";
 }
 
 

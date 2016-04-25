@@ -130,7 +130,12 @@ Graph<int> MapReading::getGraph(){
 	return g;
 }
 
-map<int, pair<int,int> > MapReading::getEdges(){
+map<int, pair<int,int> >& MapReading::getEdges(){
 	return edges;
 }
+
+map<int, pair<double, bool> >& MapReading::getEdgesProperties(){
+	return weightOfEdges;
+}
+
 

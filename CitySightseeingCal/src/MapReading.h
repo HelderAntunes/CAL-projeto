@@ -7,6 +7,7 @@
 #include <climits>
 #include "Graph.h"
 #include "graphviewer.h"
+#include "FileNotExists.h"
 
 using namespace std;
 

@@ -12,6 +12,13 @@ void MapReading::readMap(string nodesFlName, string roadsFlName, string edgesFlN
 	ifstream ifsRoads(roadsFlName.c_str());
 	ifstream ifsEdges(edgesFlName.c_str());
 
+	if(ifsNodes.is_open() == false)
+		throw FileNotExists("nodes.txt");
+	if(ifsRoads.is_open() == false)
+		throw FileNotExists("roads.txt");
+	if(ifsEdges.is_open() == false)
+		throw FileNotExists("edges.txt");
+
 	readRoadsFromFile(ifsRoads);
 	readNodesFromFile(ifsNodes);
 	readEdgesFromFile(ifsEdges);

@@ -1,13 +1,6 @@
-#include <cstdio>
 #include <fstream>
 #include <iostream>
 #include <sstream>
-#include <stdlib.h>
-#include <vector>
-#include <climits>
-#include <time.h>
-#include <map>
-#include <string>
 #include <iomanip>
 #include <algorithm>
 #include <set>
@@ -15,8 +8,6 @@
 #include "graphviewer.h"
 #include "Person.h"
 #include "MapReading.h"
-
-typedef long long int ll;
 
 vector<Person> readPersonsFromFile(string fileName);
 int readArrivalNode();
@@ -39,13 +30,22 @@ void printStrongestComponents(vector<set<int> > strongestComponents);
 int main() {
 
 	introduceTheProgram();
-
 	GraphViewer *gv = new GraphViewer(900, 600, false);
 	MapReading mr ;
-	mr.readMap("nodes.txt", "roads.txt", "edges.txt");
+	vector<Person> persons;
+
+	try{
+		persons = readPersonsFromFile("persons.txt");
+		mr.readMap("nodes.txt", "roads.txt", "edges.txt");
+	}
+	catch(FileNotExists& fne){
+		cout << "Erro ao abrir o ficheiro " << fne.getNameOfFile() << endl;
+		cout << "Reinicie o programa e certifique-se de colocar os ficheiros pedidos no lugar correto." << endl;
+		return 1;
+	}
+
 	set<int> pois;
 	Graph<int> g = mr.getGraph();
-	vector<Person> persons;
 
 	gv->createWindow(900, 600);
 	gv->defineEdgeCurved(false);
@@ -58,7 +58,6 @@ int main() {
 	gv->setVertexLabel(idEnd, "No de chegada");
 	gv->rearrange();
 
-	persons = readPersonsFromFile("persons.txt");
 	pois = getPoisFromPersons(persons);
 	addPoisToGraphViewer(gv,pois);
 	pois.insert(idStart);
@@ -190,11 +189,12 @@ void printTourists(vector<Person>& persons){
 void introduceTheProgram(){
 	cout << "Bem-vindo!\n";
 	cout << endl;
-	cout << "Para utilizar este programa precisa indicar 3 ficheiros gerados pelo OpenStreetMapsParser.\n";
+	cout << "Para utilizar este programa precisa colocar 3 ficheiros gerados pelo OpenStreetMapsParser\n";
+	cout << "na pasta principal do projeto:\n";
 	cout << "	Ficheiro nodes.txt\n";
 	cout << "	Ficheiro edges.txt\n";
 	cout << "	Ficheiro roads.txt\n";
-	cout << "Precisa tambem do ficheiro\n"
+	cout << "Precisa tambem do ficheiro dos turistas na mesma pasta\n"
 			"	persons.txt: informacao acerca das pessoas e seus pontos de interesse\n"
 			"Formatacao deste ficheiro:\n"
 			"nome_da_pessoa\n"
@@ -356,6 +356,8 @@ int readArrivalNode(){
 
 vector<Person> readPersonsFromFile(string fileName){
 	ifstream ifsPersons(fileName.c_str());
+	if(ifsPersons.is_open() == false)
+		throw FileNotExists(fileName);
 	vector<Person> persons;
 	string s;
 	while(1){
@@ -376,4 +378,3 @@ vector<Person> readPersonsFromFile(string fileName){
 	ifsPersons.close();
 	return persons;
 }
-

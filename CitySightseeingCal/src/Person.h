@@ -1,10 +1,3 @@
-/*
- * Person.h
- *
- *  Created on: 18/04/2016
- *      Author: Asus
- */
-
 #ifndef PERSON_H_
 #define PERSON_H_
 

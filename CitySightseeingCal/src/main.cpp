@@ -270,10 +270,8 @@ long int calcDistOfPath(vector<int> path, vector<vector<int> >& W){
 	long int d = 0;
 	for(size_t i = 1;i < path.size();i++){
 		d += W[path[i - 1]][path[i]];
-		cout << W[path[i - 1]][path[i]] << endl;
 	}
-	cout << W[85][104]<< endl;
-	cout << W[20][42]<< endl;
+
 	return d;
 }
 

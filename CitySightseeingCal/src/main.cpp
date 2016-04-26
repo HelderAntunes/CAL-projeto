@@ -176,8 +176,11 @@ vector<int> getArticulationPoints(Graph<int>& g, int idStart){
 }
 
 void printPath(vector<int>& path){
-	for(size_t i = 0;i < path.size();i++)
+	for(size_t i = 0;i < path.size();i++){
+		if(i%30 == 0)
+			cout << endl;
 		cout << path[i] << " ";
+	}
 	cout << endl;
 }
 

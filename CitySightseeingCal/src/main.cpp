@@ -16,7 +16,7 @@ void addPoisToGraphViewer(GraphViewer *gv, set<int>& pois);
 set<int> getPoisFromPersons(vector<Person>& persons);
 vector<vector<Person> > agroupPersonsByTheirPois(vector<Person>& persons, vector<set<int> > strongestComponents);
 Graph<int> createGraphUsingPois(set<int>& pois, vector<vector<int> >& W);
-int calcDistOfPath(vector<int> path, vector<vector<int> >& W);
+long int calcDistOfPath(vector<int> path, vector<vector<int> >& W);
 vector<int> calculatePath(vector<Person>& persons, int idStart, int idEnd, vector<vector<int> >& W, bool& graphIsConnected);
 void introduceTheProgram();
 void printTourists(vector<Person>& persons);
@@ -83,7 +83,7 @@ int main() {
 			continue;
 		}
 
-		int distance = calcDistOfPath(path, W);
+
 
 		cout << "Caminho gerado" << endl;
 		vector<int> allPath = getAllPath(path, g);
@@ -92,6 +92,7 @@ int main() {
 		gv->rearrange();
 		cout << endl;
 
+		long int distance = calcDistOfPath(allPath, W);
 		cout << "Distancia percorrida: " << distance << endl << endl;
 
 		vector<int> articulationPointsInPath = getPointsOfMapThatCanInterruptThePath(path, articulationPoints);
@@ -265,12 +266,14 @@ vector<vector<Person> > agroupPersonsByTheirPois(vector<Person>& persons, vector
 	return groups;
 }
 
-int calcDistOfPath(vector<int> path, vector<vector<int> >& W){
-	int d = 0;
+long int calcDistOfPath(vector<int> path, vector<vector<int> >& W){
+	long int d = 0;
 	for(size_t i = 1;i < path.size();i++){
-		int weight = W[path[i]][path[i-1]];
-		d += weight;
+		d += W[path[i - 1]][path[i]];
+		cout << W[path[i - 1]][path[i]] << endl;
 	}
+	cout << W[85][104]<< endl;
+	cout << W[20][42]<< endl;
 	return d;
 }
 

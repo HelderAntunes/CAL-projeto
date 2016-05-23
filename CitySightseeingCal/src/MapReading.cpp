@@ -180,6 +180,17 @@ void MapReading::makeManualGraph(GraphViewer *gv){
 	// end node
 	gv->addNode(10,startX+7*dist,startY);
 
+	gv->setVertexLabel(0, "Infante D Henrique");
+	gv->setVertexLabel(1, "Torre do Clerigos");
+	gv->setVertexLabel(4, "Avenida dos Aliados");
+	gv->setVertexLabel(6, "Praca do Infante");
+	gv->setVertexLabel(8, "Cais de Gaia");
+	gv->setVertexLabel(10, "Alfandega do Porto");
+	gv->setVertexLabel(11, "Palacio da Bolsa");
+	gv->setVertexLabel(14, "Casa da Musica");
+	gv->setVertexLabel(16, "Palacio de Cristal");
+	gv->setVertexLabel(18, "Parque da Cidade");
+
 	gv->addEdge(0, 0, 1, EdgeType::UNDIRECTED);
 	gv->addEdge(1, 1, 2, EdgeType::UNDIRECTED);
 	gv->addEdge(2, 2, 4, EdgeType::UNDIRECTED);
@@ -205,6 +216,31 @@ void MapReading::makeManualGraph(GraphViewer *gv){
 	gv->addEdge(21, 17, 18, EdgeType::UNDIRECTED);
 	gv->addEdge(22, 18, 19, EdgeType::UNDIRECTED);
 	gv->addEdge(23, 19, 10, EdgeType::UNDIRECTED);
+
+	gv->setEdgeFlow(0,5);
+	gv->setEdgeFlow(1,7);
+	gv->setEdgeFlow(2,4);
+	gv->setEdgeFlow(3,8);
+	gv->setEdgeFlow(4,1);
+	gv->setEdgeFlow(5,4);
+	gv->setEdgeFlow(6,9);
+	gv->setEdgeFlow(7,11);
+	gv->setEdgeFlow(8,35);
+	gv->setEdgeFlow(9,3);
+	gv->setEdgeFlow(10,7);
+	gv->setEdgeFlow(11,3);
+	gv->setEdgeFlow(12,15);
+	gv->setEdgeFlow(13,19);
+	gv->setEdgeFlow(14,7);
+	gv->setEdgeFlow(15,8);
+	gv->setEdgeFlow(16,5);
+	gv->setEdgeFlow(17,9);
+	gv->setEdgeFlow(18,13);
+	gv->setEdgeFlow(19,15);
+	gv->setEdgeFlow(20,18);
+	gv->setEdgeFlow(21,4);
+	gv->setEdgeFlow(22,6);
+	gv->setEdgeFlow(23,18);
 
 	gv->rearrange();
 }

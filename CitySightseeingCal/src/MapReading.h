@@ -22,6 +22,7 @@ private:
 	map<int, pair<double,double> > nodes;
 	map<int, pair<int,int> > edges;
 	map<int,pair<double,bool> > weightOfEdges;
+	map<int, string> nameOfNodes;
 
 public:
 	MapReading(){};
@@ -34,8 +35,9 @@ public:
 	map<int, pair<int,int> >& getEdges();
 	map<int, pair<double, bool> >& getEdgesProperties();
 	void sendDataToGraphViewer(GraphViewer *gv);
+	void sendDataToGraphViewerManual(GraphViewer *gv);
 	Graph<int> getGraph();
-	void makeManualGraph(GraphViewer *gv);
+	void makeManualGraph();
 
 };
 

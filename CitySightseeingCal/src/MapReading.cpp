@@ -145,104 +145,115 @@ map<int, pair<double, bool> >& MapReading::getEdgesProperties(){
 	return weightOfEdges;
 }
 
-void MapReading::makeManualGraph(GraphViewer *gv){
+void MapReading::sendDataToGraphViewerManual(GraphViewer *gv){
+
+	for(size_t i = 0;i < nodes.size();i++){
+		double x, y;
+		x = nodes[i].first;
+		y = nodes[i].second;
+		gv->addNode(i, x, y);
+		gv->setVertexLabel(i, nameOfNodes[i]);
+	}
+
+	for(size_t i = 0;i < edges.size();i++){
+		int o = edges[i].first;
+		int d = edges[i].second;
+
+		if(weightOfEdges[i].second == false)
+			gv->addEdge(i, o, d, EdgeType::UNDIRECTED);
+		else
+			gv->addEdge(i, o, d, EdgeType::DIRECTED);
+
+		gv->setEdgeFlow(i, weightOfEdges[i].first);
+	}
+}
+
+void MapReading::makeManualGraph(){
 	int startX = 50, startY = 300, dist = 100;
 
-	gv->createWindow(900, 600);
-	gv->defineEdgeCurved(false);
+	nodes[0] = pair<double,double>(startX,startY);
+	nodes[1] = pair<double,double>(startX+dist,startY-dist);
+	nodes[2] = pair<double,double>(startX+2*dist,startY-2*dist);
+	nodes[3] = pair<double,double>(startX+2*dist,startY-50);
+	nodes[4] = pair<double,double>(startX+3*dist,startY-dist);
+	nodes[5] = pair<double,double>(startX+4*dist,startY-2*dist);
+	nodes[6] = pair<double,double>(startX+4*dist,startY-3*dist+50);
+	nodes[7] = pair<double,double>(startX+5*dist,startY-2*dist);
+	nodes[8] = pair<double,double>(startX+5*dist,startY-dist);
+	nodes[9] = pair<double,double>(startX+6*dist,startY-dist);
+	nodes[11] = pair<double,double>(startX+dist,startY+dist);
+	nodes[12] = pair<double,double>(startX+2*dist,startY+2*dist);
+	nodes[13] = pair<double,double>(startX+2*dist,startY+50);
+	nodes[14] = pair<double,double>(startX+3*dist,startY+dist);
+	nodes[15] = pair<double,double>(startX+4*dist,startY+2*dist);
+	nodes[16] = pair<double,double>(startX+4*dist,startY+3*dist-50);
+	nodes[17] = pair<double,double>(startX+5*dist,startY+2*dist);
+	nodes[18] = pair<double,double>(startX+5*dist,startY+dist);
+	nodes[19] = pair<double,double>(startX+6*dist,startY+dist);
+	nodes[10] = pair<double,double>(startX+7*dist,startY);
 
-	gv->defineEdgeColor("blue");
-	gv->defineVertexColor("yellow");
+	for(int i = 0;i <= 19;i++)
+		nameOfNodes[i] = "";
+	nameOfNodes[0] = "Infante D Henrique";
+	nameOfNodes[1] = "Torre do Clerigos";
+	nameOfNodes[4] = "Avenida dos Aliados";
+	nameOfNodes[6] = "Praca do Infante";
+	nameOfNodes[8] = "Cais de Gaia";
+	nameOfNodes[10] = "Alfandega do Porto";
+	nameOfNodes[11] = "Palacio da Bolsa";
+	nameOfNodes[14] = "Casa da Musica";
+	nameOfNodes[16] = "Palacio de Cristal";
+	nameOfNodes[18] = "Parque da Cidade";
 
-	// start node
-	gv->addNode(0,startX,startY);
+	edges[0] = pair<int,int>(0,1);
+	edges[1] = pair<int,int>(1,2);
+	edges[2] = pair<int,int>(2,4);
+	edges[3] = pair<int,int>(3,4);
+	edges[4] = pair<int,int>(1,3);
+	edges[5] = pair<int,int>(4,5);
+	edges[6] = pair<int,int>(5,6);
+	edges[7] = pair<int,int>(6,7);
+	edges[8] = pair<int,int>(5,7);
+	edges[9] = pair<int,int>(7,8);
+	edges[10] = pair<int,int>(8,9);
+	edges[11] = pair<int,int>(9,10);
+	edges[12] = pair<int,int>(0,11);
+	edges[13] = pair<int,int>(11,13);
+	edges[14] = pair<int,int>(13,14);
+	edges[15] = pair<int,int>(14,12);
+	edges[16] = pair<int,int>(11,12);
+	edges[17] = pair<int,int>(14,15);
+	edges[18] = pair<int,int>(15,16);
+	edges[19] = pair<int,int>(16,17);
+	edges[20] = pair<int,int>(16,18);
+	edges[21] = pair<int,int>(17,18);
+	edges[22] = pair<int,int>(18,19);
+	edges[23] = pair<int,int>(19,10);
 
-	gv->addNode(1,startX+dist,startY-dist);
-	gv->addNode(2,startX+2*dist,startY-2*dist);
-	gv->addNode(3,startX+2*dist,startY-50);
-	gv->addNode(4,startX+3*dist,startY-dist);
-	gv->addNode(5,startX+4*dist,startY-2*dist);
-	gv->addNode(6,startX+4*dist,startY-3*dist+50);
-	gv->addNode(7,startX+5*dist,startY-2*dist);
-	gv->addNode(8,startX+5*dist,startY-dist);
-	gv->addNode(9,startX+6*dist,startY-dist);
-
-	gv->addNode(11,startX+dist,startY+dist);
-	gv->addNode(12,startX+2*dist,startY+2*dist);
-	gv->addNode(13,startX+2*dist,startY+50);
-	gv->addNode(14,startX+3*dist,startY+dist);
-	gv->addNode(15,startX+4*dist,startY+2*dist);
-	gv->addNode(16,startX+4*dist,startY+3*dist-50);
-	gv->addNode(17,startX+5*dist,startY+2*dist);
-	gv->addNode(18,startX+5*dist,startY+dist);
-	gv->addNode(19,startX+6*dist,startY+dist);
-
-	// end node
-	gv->addNode(10,startX+7*dist,startY);
-
-	gv->setVertexLabel(0, "Infante D Henrique");
-	gv->setVertexLabel(1, "Torre do Clerigos");
-	gv->setVertexLabel(4, "Avenida dos Aliados");
-	gv->setVertexLabel(6, "Praca do Infante");
-	gv->setVertexLabel(8, "Cais de Gaia");
-	gv->setVertexLabel(10, "Alfandega do Porto");
-	gv->setVertexLabel(11, "Palacio da Bolsa");
-	gv->setVertexLabel(14, "Casa da Musica");
-	gv->setVertexLabel(16, "Palacio de Cristal");
-	gv->setVertexLabel(18, "Parque da Cidade");
-
-	gv->addEdge(0, 0, 1, EdgeType::UNDIRECTED);
-	gv->addEdge(1, 1, 2, EdgeType::UNDIRECTED);
-	gv->addEdge(2, 2, 4, EdgeType::UNDIRECTED);
-	gv->addEdge(3, 3, 4, EdgeType::UNDIRECTED);
-	gv->addEdge(4, 1, 3, EdgeType::UNDIRECTED);
-	gv->addEdge(5, 4, 5, EdgeType::UNDIRECTED);
-	gv->addEdge(6, 5, 6, EdgeType::UNDIRECTED);
-	gv->addEdge(7, 6, 7, EdgeType::UNDIRECTED);
-	gv->addEdge(8, 5, 7, EdgeType::UNDIRECTED);
-	gv->addEdge(9, 7, 8, EdgeType::UNDIRECTED);
-	gv->addEdge(10, 8, 9, EdgeType::UNDIRECTED);
-	gv->addEdge(11, 9, 10, EdgeType::UNDIRECTED);
-
-	gv->addEdge(12, 0, 11, EdgeType::UNDIRECTED);
-	gv->addEdge(13, 11, 13, EdgeType::UNDIRECTED);
-	gv->addEdge(14, 13, 14, EdgeType::UNDIRECTED);
-	gv->addEdge(15, 14, 12, EdgeType::UNDIRECTED);
-	gv->addEdge(16, 11, 12, EdgeType::UNDIRECTED);
-	gv->addEdge(17, 14, 15, EdgeType::UNDIRECTED);
-	gv->addEdge(18, 15, 16, EdgeType::UNDIRECTED);
-	gv->addEdge(19, 16, 17, EdgeType::UNDIRECTED);
-	gv->addEdge(20, 16, 18, EdgeType::UNDIRECTED);
-	gv->addEdge(21, 17, 18, EdgeType::UNDIRECTED);
-	gv->addEdge(22, 18, 19, EdgeType::UNDIRECTED);
-	gv->addEdge(23, 19, 10, EdgeType::UNDIRECTED);
-
-	gv->setEdgeFlow(0,5);
-	gv->setEdgeFlow(1,7);
-	gv->setEdgeFlow(2,4);
-	gv->setEdgeFlow(3,8);
-	gv->setEdgeFlow(4,1);
-	gv->setEdgeFlow(5,4);
-	gv->setEdgeFlow(6,9);
-	gv->setEdgeFlow(7,11);
-	gv->setEdgeFlow(8,35);
-	gv->setEdgeFlow(9,3);
-	gv->setEdgeFlow(10,7);
-	gv->setEdgeFlow(11,3);
-	gv->setEdgeFlow(12,15);
-	gv->setEdgeFlow(13,19);
-	gv->setEdgeFlow(14,7);
-	gv->setEdgeFlow(15,8);
-	gv->setEdgeFlow(16,5);
-	gv->setEdgeFlow(17,9);
-	gv->setEdgeFlow(18,13);
-	gv->setEdgeFlow(19,15);
-	gv->setEdgeFlow(20,18);
-	gv->setEdgeFlow(21,4);
-	gv->setEdgeFlow(22,6);
-	gv->setEdgeFlow(23,18);
-
-	gv->rearrange();
+	weightOfEdges[0] = pair<double,bool>(5,false);
+	weightOfEdges[1] = pair<double,bool>(7,false);
+	weightOfEdges[2] = pair<double,bool>(4,false);
+	weightOfEdges[3] = pair<double,bool>(8,false);
+	weightOfEdges[4] = pair<double,bool>(1,false);
+	weightOfEdges[5] = pair<double,bool>(4,false);
+	weightOfEdges[6] = pair<double,bool>(9,false);
+	weightOfEdges[7] = pair<double,bool>(11,false);
+	weightOfEdges[8] = pair<double,bool>(35,false);
+	weightOfEdges[9] = pair<double,bool>(3,false);
+	weightOfEdges[10] = pair<double,bool>(7,false);
+	weightOfEdges[11] = pair<double,bool>(3,false);
+	weightOfEdges[12] = pair<double,bool>(15,false);
+	weightOfEdges[13] = pair<double,bool>(19,false);
+	weightOfEdges[14] = pair<double,bool>(7,false);
+	weightOfEdges[15] = pair<double,bool>(8,false);
+	weightOfEdges[16] = pair<double,bool>(5,false);
+	weightOfEdges[17] = pair<double,bool>(9,false);
+	weightOfEdges[18] = pair<double,bool>(13,false);
+	weightOfEdges[19] = pair<double,bool>(15,false);
+	weightOfEdges[20] = pair<double,bool>(18,false);
+	weightOfEdges[21] = pair<double,bool>(4,false);
+	weightOfEdges[22] = pair<double,bool>(6,false);
+	weightOfEdges[23] = pair<double,bool>(18,false);
 }
 
 

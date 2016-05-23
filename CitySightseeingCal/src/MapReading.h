@@ -35,6 +35,7 @@ public:
 	map<int, pair<double, bool> >& getEdgesProperties();
 	void sendDataToGraphViewer(GraphViewer *gv);
 	Graph<int> getGraph();
+	void makeManualGraph(GraphViewer *gv);
 
 };
 

@@ -145,4 +145,68 @@ map<int, pair<double, bool> >& MapReading::getEdgesProperties(){
 	return weightOfEdges;
 }
 
+void MapReading::makeManualGraph(GraphViewer *gv){
+	int startX = 50, startY = 300, dist = 100;
+
+	gv->createWindow(900, 600);
+	gv->defineEdgeCurved(false);
+
+	gv->defineEdgeColor("blue");
+	gv->defineVertexColor("yellow");
+
+	// start node
+	gv->addNode(0,startX,startY);
+
+	gv->addNode(1,startX+dist,startY-dist);
+	gv->addNode(2,startX+2*dist,startY-2*dist);
+	gv->addNode(3,startX+2*dist,startY-50);
+	gv->addNode(4,startX+3*dist,startY-dist);
+	gv->addNode(5,startX+4*dist,startY-2*dist);
+	gv->addNode(6,startX+4*dist,startY-3*dist+50);
+	gv->addNode(7,startX+5*dist,startY-2*dist);
+	gv->addNode(8,startX+5*dist,startY-dist);
+	gv->addNode(9,startX+6*dist,startY-dist);
+
+	gv->addNode(11,startX+dist,startY+dist);
+	gv->addNode(12,startX+2*dist,startY+2*dist);
+	gv->addNode(13,startX+2*dist,startY+50);
+	gv->addNode(14,startX+3*dist,startY+dist);
+	gv->addNode(15,startX+4*dist,startY+2*dist);
+	gv->addNode(16,startX+4*dist,startY+3*dist-50);
+	gv->addNode(17,startX+5*dist,startY+2*dist);
+	gv->addNode(18,startX+5*dist,startY+dist);
+	gv->addNode(19,startX+6*dist,startY+dist);
+
+	// end node
+	gv->addNode(10,startX+7*dist,startY);
+
+	gv->addEdge(0, 0, 1, EdgeType::UNDIRECTED);
+	gv->addEdge(1, 1, 2, EdgeType::UNDIRECTED);
+	gv->addEdge(2, 2, 4, EdgeType::UNDIRECTED);
+	gv->addEdge(3, 3, 4, EdgeType::UNDIRECTED);
+	gv->addEdge(4, 1, 3, EdgeType::UNDIRECTED);
+	gv->addEdge(5, 4, 5, EdgeType::UNDIRECTED);
+	gv->addEdge(6, 5, 6, EdgeType::UNDIRECTED);
+	gv->addEdge(7, 6, 7, EdgeType::UNDIRECTED);
+	gv->addEdge(8, 5, 7, EdgeType::UNDIRECTED);
+	gv->addEdge(9, 7, 8, EdgeType::UNDIRECTED);
+	gv->addEdge(10, 8, 9, EdgeType::UNDIRECTED);
+	gv->addEdge(11, 9, 10, EdgeType::UNDIRECTED);
+
+	gv->addEdge(12, 0, 11, EdgeType::UNDIRECTED);
+	gv->addEdge(13, 11, 13, EdgeType::UNDIRECTED);
+	gv->addEdge(14, 13, 14, EdgeType::UNDIRECTED);
+	gv->addEdge(15, 14, 12, EdgeType::UNDIRECTED);
+	gv->addEdge(16, 11, 12, EdgeType::UNDIRECTED);
+	gv->addEdge(17, 14, 15, EdgeType::UNDIRECTED);
+	gv->addEdge(18, 15, 16, EdgeType::UNDIRECTED);
+	gv->addEdge(19, 16, 17, EdgeType::UNDIRECTED);
+	gv->addEdge(20, 16, 18, EdgeType::UNDIRECTED);
+	gv->addEdge(21, 17, 18, EdgeType::UNDIRECTED);
+	gv->addEdge(22, 18, 19, EdgeType::UNDIRECTED);
+	gv->addEdge(23, 19, 10, EdgeType::UNDIRECTED);
+
+	gv->rearrange();
+}
+
 

@@ -26,9 +26,72 @@ vector<int> getArticulationPoints(Graph<int>& g, int idStart);
 vector<int> getPointsOfMapThatCanInterruptThePath(vector<int>& path, vector<int>& artPoints);
 void printColorEdges(GraphViewer *gv, map<int, pair<int,int> >& edges, map<int, pair<double,bool> >& edgesProperties, vector<int> allPath, int val);
 void printStrongestComponents(vector<set<int> > strongestComponents);
+void adicionarTurista(vector<Person> &turistas);
+void level2(vector<Person> &turistas);
+
+void level1(vector<Person> &turistas){
+	string valor;
+	system("cls");
+
+	cout << "1 - Inserir turista" << endl;
+	cout << "2 - Exit" << endl;
+	cout << "Indique a sua opcao: " ;
+	getline(cin, valor);
+	int value = atoi(valor.c_str());
+
+	switch (value) {
+		case 1:
+			adicionarTurista(turistas);
+			break;
+		case 2:
+			exit(0);
+			break;
+	}
+}
+void adicionarTurista(vector<Person> &turistas){
+	string nome;
+	system("cls");
+	cout << "Indique o nome : ";
+	getline(cin, nome);
+	Person p = Person(nome);
+	turistas.push_back(p);
+	level2(turistas);
+}
+
+void chooseByPersons(vector<Person> &turistas){
+	system("cls");
+	string nome;
+	printTourists(turistas);
+	cout << endl;
+	cout << "Escolha o turista com quem quer ir: ";
+	getline(cin, nome);
+	level1(turistas);
+}
+
+void level2(vector<Person> &turistas){
+	system("cls");
+	string valor = "";
+	cout <<"1 - Escolher por pessoas conhecidas" << endl;
+	cout <<"2 - Escolher por POIS" << endl;
+	cout <<"Indique a sua opcao: ";
+	getline(cin,valor);
+	int value = atoi(valor.c_str());
+
+
+	switch (value) {
+		case 1:
+			chooseByPersons(turistas);
+			break;
+		case 2:
+			// escolher por pois
+			break;
+	}
+
+}
 
 int main() {
-
+	vector<Person> turistas;
+	level1(turistas);
 	introduceTheProgram();
 	GraphViewer *gv = new GraphViewer(900, 600, false);
 	MapReading mr ;

@@ -34,6 +34,7 @@ public:
 	void readRoadsFromFile(ifstream& ifs);		//ROADS
 	map<int, pair<int,int> >& getEdges();
 	map<int, pair<double, bool> >& getEdgesProperties();
+	map<int, string>& getNameOfNodes();
 	void sendDataToGraphViewer(GraphViewer *gv);
 	void sendDataToGraphViewerManual(GraphViewer *gv);
 	Graph<int> getGraph();

@@ -26,10 +26,11 @@ vector<int> getArticulationPoints(Graph<int>& g, int idStart);
 vector<int> getPointsOfMapThatCanInterruptThePath(vector<int>& path, vector<int>& artPoints);
 void printColorEdges(GraphViewer *gv, map<int, pair<int,int> >& edges, map<int, pair<double,bool> >& edgesProperties, vector<int> allPath, int val);
 void printStrongestComponents(vector<set<int> > strongestComponents);
-void adicionarTurista(vector<Person> &turistas);
-void level2(vector<Person> &turistas);
+void adicionarTurista(vector<Person> &turistas, map<int, string> nameOfNodes);
+void level2(vector<Person> &turistas, map<int, string> nameOfNodes);
+void printPOIS( map<int, string> nameOfNodes);
 
-void level1(vector<Person> &turistas){
+void level1(vector<Person> &turistas, map<int, string> nameOfNodes){
 	string valor;
 	system("cls");
 
@@ -40,58 +41,84 @@ void level1(vector<Person> &turistas){
 	int value = atoi(valor.c_str());
 
 	switch (value) {
-		case 1:
-			adicionarTurista(turistas);
-			break;
-		case 2:
-			exit(0);
-			break;
+	case 1:
+		adicionarTurista(turistas, nameOfNodes);
+		break;
+	case 2:
+		exit(0);
+		break;
 	}
 }
-void adicionarTurista(vector<Person> &turistas){
+void adicionarTurista(vector<Person> &turistas, map<int, string> nameOfNodes){
 	string nome;
 	system("cls");
 	cout << "Indique o nome : ";
 	getline(cin, nome);
 	Person p = Person(nome);
 	turistas.push_back(p);
-	level2(turistas);
+	level2(turistas, nameOfNodes);
 }
 
-void chooseByPersons(vector<Person> &turistas){
+void chooseByPersons(vector<Person> turistas){
 	system("cls");
 	string nome;
 	printTourists(turistas);
 	cout << endl;
 	cout << "Escolha o turista com quem quer ir: ";
 	getline(cin, nome);
-	level1(turistas);
+
 }
 
-void level2(vector<Person> &turistas){
+void chooseByPOI(map<int, string> nameOfNodes){
 	system("cls");
+	printPOIS(nameOfNodes);
+	cout << "Insira os POIS, por onde pretende passar (Para terminar 0): ";
+	string pInteresse = "";
+	vector<string> pontosDeInteresse;
+	while(pInteresse != "0"){
+		getline(cin, pInteresse);
+		pontosDeInteresse.push_back(pInteresse);
+	}
+}
+
+void level2(vector<Person> &turistas, map<int, string> nameOfNodes){
+	system("cls");
+	boolean flag;
 	string valor = "";
-	cout <<"1 - Escolher por pessoas conhecidas" << endl;
-	cout <<"2 - Escolher por POIS" << endl;
-	cout <<"Indique a sua opcao: ";
-	getline(cin,valor);
-	int value = atoi(valor.c_str());
 
+		cout <<"1 - Escolher por pessoas conhecidas" << endl;
+		cout <<"2 - Escolher por POIS" << endl;
+		cout <<"Indique a sua opcao: ";
+		getline(cin,valor);
+		int value = atoi(valor.c_str());
 
-	switch (value) {
+		switch (value) {
 		case 1:
-			chooseByPersons(turistas);
+			if(turistas.size() > 1){
+				flag = true;
+				chooseByPersons(turistas);
+			}
+			else{
+				valor = "";
+				flag = false;
+				system("cls");
+			}
 			break;
 		case 2:
-			// escolher por pois
+			chooseByPOI(nameOfNodes);
 			break;
-	}
+		}
 
+
+	level1(turistas, nameOfNodes);
 }
 
 int main() {
 	vector<Person> turistas;
-	level1(turistas);
+	MapReading mr ;
+	mr.makeManualGraph();
+	level1(turistas, mr.getNameOfNodes());
+	/*
 	introduceTheProgram();
 	GraphViewer *gv = new GraphViewer(900, 600, false);
 	MapReading mr ;
@@ -175,7 +202,7 @@ int main() {
 
 	cout << "Prima qualquer tecla para terminar..." << endl;
 	getchar();
-
+	 */
 	return 0;
 }
 
@@ -444,4 +471,15 @@ vector<Person> readPersonsFromFile(string fileName){
 	}
 	ifsPersons.close();
 	return persons;
+}
+
+void printPOIS( map<int, string> nameOfNodes){
+	map<int,string>::const_iterator map = nameOfNodes.begin();
+
+	while(map != nameOfNodes.end()){
+		if(map->second != "")
+			cout << map->second << endl;
+
+		map++;
+	}
 }

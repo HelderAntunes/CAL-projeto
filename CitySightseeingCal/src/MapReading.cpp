@@ -168,6 +168,10 @@ void MapReading::sendDataToGraphViewerManual(GraphViewer *gv){
 	}
 }
 
+map<int, string>& MapReading::getNameOfNodes(){
+	return nameOfNodes;
+}
+
 void MapReading::makeManualGraph(){
 	int startX = 50, startY = 300, dist = 100;
 
@@ -193,7 +197,7 @@ void MapReading::makeManualGraph(){
 	nodes[10] = pair<double,double>(startX+7*dist,startY);
 
 	for(int i = 0;i <= 19;i++)
-		nameOfNodes[i] = "";
+	nameOfNodes[i] = "";
 	nameOfNodes[0] = "Infante D Henrique";
 	nameOfNodes[1] = "Torre do Clerigos";
 	nameOfNodes[4] = "Avenida dos Aliados";

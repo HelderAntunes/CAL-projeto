@@ -15,7 +15,7 @@ int readStartNode();
 void addPoisToGraphViewer(GraphViewer *gv, set<int>& pois);
 set<int> getPoisFromPersons(vector<Person>& persons);
 vector<vector<Person> > agroupPersonsByTheirPois(vector<Person>& persons, vector<set<int> > strongestComponents);
-Graph<int> createGraphUsingPois(set<int>& pois, vector<vector<int> >& W);
+Graph<int> createGraphUsingPois(vector<int>& poisV, vector<vector<int> >& W);
 long int calcDistOfPath(vector<int> path, vector<vector<int> >& W);
 vector<int> calculatePath(vector<Person>& persons, int idStart, int idEnd, vector<vector<int> >& W, bool& graphIsConnected);
 void introduceTheProgram();
@@ -29,6 +29,7 @@ void printStrongestComponents(vector<set<int> > strongestComponents);
 void adicionarTurista(vector<Person> &turistas, map<int, string> nameOfNodes);
 void level2(vector<Person> &turistas, map<int, string> nameOfNodes);
 void printPOIS( map<int, string> nameOfNodes);
+vector<int> calculatePath2(vector<int>& pois, vector<vector<int> >& W);
 
 void level1(vector<Person> &turistas, map<int, string> nameOfNodes){
 	string valor;
@@ -75,10 +76,9 @@ void chooseByPOI(map<int, string> nameOfNodes){
 	cout << "Insira os POIS, por onde pretende passar (Para terminar 0): ";
 	string pInteresse = "";
 	vector<string> pontosDeInteresse;
-	while(pInteresse != "0"){
-		getline(cin, pInteresse);
-		pontosDeInteresse.push_back(pInteresse);
-	}
+	getline(cin, pInteresse);
+	pontosDeInteresse.push_back(pInteresse);
+
 }
 
 void level2(vector<Person> &turistas, map<int, string> nameOfNodes){
@@ -86,28 +86,29 @@ void level2(vector<Person> &turistas, map<int, string> nameOfNodes){
 	boolean flag;
 	string valor = "";
 
-		cout <<"1 - Escolher por pessoas conhecidas" << endl;
-		cout <<"2 - Escolher por POIS" << endl;
-		cout <<"Indique a sua opcao: ";
-		getline(cin,valor);
-		int value = atoi(valor.c_str());
+	cout <<"1 - Escolher por pessoas conhecidas" << endl;
+	cout <<"2 - Escolher por POIS" << endl;
+	cout <<"Indique a sua opcao: ";
+	getline(cin,valor);
+	int value = atoi(valor.c_str());
 
-		switch (value) {
-		case 1:
-			if(turistas.size() > 1){
-				flag = true;
-				chooseByPersons(turistas);
-			}
-			else{
-				valor = "";
-				flag = false;
-				system("cls");
-			}
-			break;
-		case 2:
-			chooseByPOI(nameOfNodes);
-			break;
+	switch (value) {
+	case 1:
+		if(turistas.size() > 1){
+			flag = true;
+			chooseByPersons(turistas);
 		}
+		else{
+
+			system("cls");
+		}
+		break;
+	case 2:
+		chooseByPOI(nameOfNodes);
+		break;
+	default:
+		break;
+	}
 
 
 	level1(turistas, nameOfNodes);
@@ -117,7 +118,62 @@ int main() {
 	vector<Person> turistas;
 	MapReading mr ;
 	mr.makeManualGraph();
-	level1(turistas, mr.getNameOfNodes());
+	GraphViewer *gv = new GraphViewer(900, 600, false);
+	gv->createWindow(900, 600);
+	gv->defineEdgeCurved(false);
+	mr.sendDataToGraphViewerManual(gv);
+	gv->rearrange();
+	//level1(turistas, mr.getNameOfNodes());
+
+	vector<vector<string> > paths;
+	int idPath = 0;
+	cout << "Gerador de autocarros\n";
+	while(1){
+		vector<string> path;
+		cout << "Indique os Pois do autocarro " << idPath+1 << "\n";
+		cout << "Poi de partida(-1 para terminar): ";
+		string s;
+		getline(cin, s);
+		if(s == "-1")
+			break;
+		path.push_back(s);
+		cout << "Poi de chegada: ";
+		getline(cin, s);
+		path.push_back(s);
+
+		while(1){
+			cout << "Indique outro Poi(-1 para terminar): ";
+			getline(cin, s);
+			if(s == "-1")
+				break;
+			else
+				path.push_back(s);
+		}
+		paths.push_back(path);
+		idPath++;
+	}
+
+	vector<vector<int> > pathsInIntFormat = mr.getPathsInIntFormat(paths);
+	Graph<int> g = mr.getGraph();
+
+	g.floydWarshallShortestPath();
+	vector<vector<int> > W = g.getWeightBetweenAllVertexs();
+
+	for(int i = 0;i < pathsInIntFormat.size();i++){
+		vector<int> path = calculatePath2(pathsInIntFormat[i], W);
+
+		cout << "Caminho gerado" << endl;
+		vector<int> allPath = getAllPath(path, g);
+		printPath(allPath);
+		printColorEdges(gv, mr.getEdges(), mr.getEdgesProperties(), allPath, i);
+		gv->rearrange();
+
+	}
+	getchar();
+
+
+
+
 	/*
 	introduceTheProgram();
 	GraphViewer *gv = new GraphViewer(900, 600, false);
@@ -172,8 +228,6 @@ int main() {
 			printTourists(groups[i]);
 			continue;
 		}
-
-
 
 		cout << "Caminho gerado" << endl;
 		vector<int> allPath = getAllPath(path, g);
@@ -299,23 +353,11 @@ void introduceTheProgram(){
 	getchar();
 }
 
-
-vector<int> calculatePath(vector<Person>& persons, int idStart, int idEnd, vector<vector<int> >& W, bool& graphIsConnected){
-	set<int> pois = getPoisFromPersons(persons);
-	pois.insert(idStart);
-	pois.insert(idEnd);
+vector<int> calculatePath2(vector<int>& pois, vector<vector<int> >& W){
+	int idStart = pois[0];
+	int idEnd = pois[1];
 	Graph<int> graphWithPois = createGraphUsingPois(pois, W);
-	vector<int> path;
-
-	if(graphWithPois.isConnected() == false){
-		cout << "Alguns pontos de interesse sao inacessives!!!\n";
-		graphIsConnected = false;
-		return path;
-	}
-
-
-	path = graphWithPois.getPathSalesmanProblem(idStart, idEnd);
-	return path;
+	return graphWithPois.getPathSalesmanProblem(idStart, idEnd);
 }
 
 vector<vector<Person> > agroupPersonsByTheirPois(vector<Person>& persons, vector<set<int> > strongestComponents){
@@ -365,13 +407,12 @@ long int calcDistOfPath(vector<int> path, vector<vector<int> >& W){
 	return d;
 }
 
-Graph<int> createGraphUsingPois(set<int>& pois, vector<vector<int> >& W){
+Graph<int> createGraphUsingPois(vector<int>& poisV, vector<vector<int> >& W){
 	Graph<int> g;
-	vector<int> poisV(pois.begin(), pois.end());
 	for(size_t k = 0;k < poisV.size();k++)
 		g.addVertex(poisV[k]);
 	for(size_t k = 0;k < poisV.size();k++)
-		for(size_t w = 0;w < pois.size();w++){
+		for(size_t w = 0;w < poisV.size();w++){
 			int weight = W[poisV[k]][poisV[w]];
 			if(weight != 0 && weight != INT_INFINITY)
 				g.addEdge(poisV[k],poisV[w],weight);

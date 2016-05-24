@@ -260,4 +260,30 @@ void MapReading::makeManualGraph(){
 	weightOfEdges[23] = pair<double,bool>(18,false);
 }
 
+int MapReading::nodeNameToId(string nameOfNode){
+	map<int, string>::const_iterator it =nameOfNodes.begin();
+
+	while(it != nameOfNodes.end()){
+		if(it->second == nameOfNode)
+			return it->first;
+
+		it++;
+	}
+	return -1;
+}
+
+vector<vector<int> > MapReading::getPathsInIntFormat(vector<vector<string> >& paths){
+	vector<vector<int> > paths_idFormat;
+	for(int i = 0;i < paths.size();i++){
+		vector<int> path_idFormat;
+		for(int j = 0;j < paths[i].size();j++){
+			string node = paths[i][j];
+			int id = nodeNameToId(node);
+			path_idFormat.push_back(id);
+		}
+		paths_idFormat.push_back(path_idFormat);
+	}
+	return paths_idFormat;
+}
+
 

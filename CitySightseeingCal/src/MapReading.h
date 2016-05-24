@@ -39,7 +39,8 @@ public:
 	void sendDataToGraphViewerManual(GraphViewer *gv);
 	Graph<int> getGraph();
 	void makeManualGraph();
-
+	int nodeNameToId(string nameOfNode);
+	vector<vector<int> > getPathsInIntFormat(vector<vector<string> >& paths);
 };
 
 #endif /* SRC_MAPREADING_H_ */

@@ -9,6 +9,7 @@
 #include "graphviewer.h"
 #include "Person.h"
 #include "MapReading.h"
+#include "Bus.h"
 
 vector<Person> readPersonsFromFile(string fileName);
 int readArrivalNode();
@@ -31,8 +32,10 @@ void adicionarTurista(vector<Person> &turistas, map<int, string> nameOfNodes);
 void level2(vector<Person> &turistas, map<int, string> nameOfNodes);
 void printPOIS( map<int, string> nameOfNodes);
 vector<int> calculatePath(vector<int>& pois, vector<vector<int> >& W);
+vector<vector<int> > constructPaths(MapReading& mr, GraphViewer *gv);
 vector<vector<int> > getPathsFromUser();
 vector<int> getPathFromUser(int pathId);
+vector<Bus> constructBuses(MapReading& mr, vector<vector<int> >& paths);
 
 void level1(vector<Person> &turistas, map<int, string> nameOfNodes){
 	string valor;
@@ -118,7 +121,7 @@ void level2(vector<Person> &turistas, map<int, string> nameOfNodes){
 }
 
 int main() {
-	MapReading mr ;
+	MapReading mr;
 	mr.makeManualGraph();
 
 	GraphViewer *gv = new GraphViewer(900, 600, false);
@@ -127,29 +130,13 @@ int main() {
 	mr.sendDataToGraphViewerManual(gv);
 	gv->rearrange();
 
-	Graph<int> g = mr.getGraph();
-	g.floydWarshallShortestPath();
-	vector<vector<int> > W = g.getWeightBetweenAllVertexs();
-
-	vector<vector<int> > paths = getPathsFromUser();
-	for(size_t i = 0;i < paths.size();i++){
-		vector<int> path = calculatePath(paths[i], W);
-
-		cout << "Caminho " << i+1 << "\n";
-		vector<int> allPath = getAllPath(path, g);
-		printPath(allPath);
-		printColorEdges(gv, mr.getEdges(), mr.getEdgesProperties(), allPath, i);
-		printColorVertex(gv, path);
-		gv->rearrange();
-
-	}
+	vector<vector<int> > paths = constructPaths(mr, gv);
 
 	mr.sendVertexLabelsToGraphViewer(gv);
 
+	vector<Bus> buses = constructBuses(mr, paths);
+
 	getchar();
-
-
-
 	/*
 	introduceTheProgram();
 	GraphViewer *gv = new GraphViewer(900, 600, false);
@@ -234,6 +221,45 @@ int main() {
 	getchar();
 	 */
 	return 0;
+}
+
+vector<Bus> constructBuses(MapReading& mr, vector<vector<int> >& paths){
+	vector<Bus> buses;
+	map<int, string> nameOfNodes = mr.getNameOfNodes();
+
+	for(size_t i = 0;i < paths.size();i++){
+		vector<int> path = paths[i];
+		Bus bus(path);
+		for(size_t j = 0;j < path.size();j++){
+			string poiName = nameOfNodes[path[j]];
+			bus.addPoi(poiName);
+		}
+		buses.push_back(bus);
+	}
+
+	return buses;
+}
+
+vector<vector<int> > constructPaths(MapReading& mr, GraphViewer *gv){
+	Graph<int> g = mr.getGraph();
+	g.floydWarshallShortestPath();
+	vector<vector<int> > W = g.getWeightBetweenAllVertexs();
+	vector<vector<int> > paths = getPathsFromUser();
+
+	for(size_t i = 0;i < paths.size();i++){
+		vector<int> path = calculatePath(paths[i], W);
+
+		cout << "Caminho " << i+1 << "\n";
+		vector<int> allPath = getAllPath(path, g);
+
+		printPath(allPath);
+		printColorEdges(gv, mr.getEdges(), mr.getEdgesProperties(), allPath, i);
+		printColorVertex(gv, path);
+		gv->rearrange();
+
+		paths[i] = allPath;
+	}
+	return paths;
 }
 
 vector<vector<int> > getPathsFromUser(){

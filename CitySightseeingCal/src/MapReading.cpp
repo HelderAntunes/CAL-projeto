@@ -173,10 +173,6 @@ void MapReading::sendVertexLabelsToGraphViewer(GraphViewer *gv){
 	}
 }
 
-map<int, string>& MapReading::getNameOfNodes(){
-	return nameOfNodes;
-}
-
 void MapReading::makeManualGraph(){
 	int startX = 50, startY = 300, dist = 100;
 
@@ -265,16 +261,8 @@ void MapReading::makeManualGraph(){
 	weightOfEdges[23] = pair<double,bool>(18,false);
 }
 
-int MapReading::nodeNameToId(string nameOfNode){
-	map<int, string>::const_iterator it =nameOfNodes.begin();
-
-	while(it != nameOfNodes.end()){
-		if(it->second == nameOfNode)
-			return it->first;
-
-		it++;
-	}
-	return -1;
+map<int, string> MapReading::getNameOfNodes(){
+	return nameOfNodes;
 }
 
 

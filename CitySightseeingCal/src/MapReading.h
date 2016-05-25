@@ -37,10 +37,10 @@ public:
 	map<int, string>& getNameOfNodes();
 	void sendDataToGraphViewer(GraphViewer *gv);
 	void sendDataToGraphViewerManual(GraphViewer *gv);
+	void sendVertexLabelsToGraphViewer(GraphViewer *gv);
 	Graph<int> getGraph();
 	void makeManualGraph();
 	int nodeNameToId(string nameOfNode);
-	vector<vector<int> > getPathsInIntFormat(vector<vector<string> >& paths);
 };
 
 #endif /* SRC_MAPREADING_H_ */

@@ -152,7 +152,6 @@ void MapReading::sendDataToGraphViewerManual(GraphViewer *gv){
 		x = nodes[i].first;
 		y = nodes[i].second;
 		gv->addNode(i, x, y);
-		gv->setVertexLabel(i, nameOfNodes[i]);
 	}
 
 	for(size_t i = 0;i < edges.size();i++){
@@ -165,6 +164,12 @@ void MapReading::sendDataToGraphViewerManual(GraphViewer *gv){
 			gv->addEdge(i, o, d, EdgeType::DIRECTED);
 
 		gv->setEdgeFlow(i, weightOfEdges[i].first);
+	}
+}
+
+void MapReading::sendVertexLabelsToGraphViewer(GraphViewer *gv){
+	for(size_t i = 0;i < nodes.size();i++){
+		gv->setVertexLabel(i, nameOfNodes[i]);
 	}
 }
 
@@ -197,7 +202,7 @@ void MapReading::makeManualGraph(){
 	nodes[10] = pair<double,double>(startX+7*dist,startY);
 
 	for(int i = 0;i <= 19;i++)
-	nameOfNodes[i] = "";
+		nameOfNodes[i] = "";
 	nameOfNodes[0] = "Infante D Henrique";
 	nameOfNodes[1] = "Torre do Clerigos";
 	nameOfNodes[4] = "Avenida dos Aliados";
@@ -272,18 +277,5 @@ int MapReading::nodeNameToId(string nameOfNode){
 	return -1;
 }
 
-vector<vector<int> > MapReading::getPathsInIntFormat(vector<vector<string> >& paths){
-	vector<vector<int> > paths_idFormat;
-	for(int i = 0;i < paths.size();i++){
-		vector<int> path_idFormat;
-		for(int j = 0;j < paths[i].size();j++){
-			string node = paths[i][j];
-			int id = nodeNameToId(node);
-			path_idFormat.push_back(id);
-		}
-		paths_idFormat.push_back(path_idFormat);
-	}
-	return paths_idFormat;
-}
 
 

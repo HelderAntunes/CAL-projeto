@@ -4,6 +4,7 @@
 #include <iomanip>
 #include <algorithm>
 #include <set>
+#include <string.h>
 #include "Graph.h"
 #include "graphviewer.h"
 #include "Person.h"
@@ -17,7 +18,6 @@ set<int> getPoisFromPersons(vector<Person>& persons);
 vector<vector<Person> > agroupPersonsByTheirPois(vector<Person>& persons, vector<set<int> > strongestComponents);
 Graph<int> createGraphUsingPois(vector<int>& poisV, vector<vector<int> >& W);
 long int calcDistOfPath(vector<int> path, vector<vector<int> >& W);
-vector<int> calculatePath(vector<Person>& persons, int idStart, int idEnd, vector<vector<int> >& W, bool& graphIsConnected);
 void introduceTheProgram();
 void printTourists(vector<Person>& persons);
 vector<int> getAllPath(vector<int>& path, Graph<int>& g);
@@ -25,11 +25,14 @@ void printPath(vector<int>& path);
 vector<int> getArticulationPoints(Graph<int>& g, int idStart);
 vector<int> getPointsOfMapThatCanInterruptThePath(vector<int>& path, vector<int>& artPoints);
 void printColorEdges(GraphViewer *gv, map<int, pair<int,int> >& edges, map<int, pair<double,bool> >& edgesProperties, vector<int> allPath, int val);
+void printColorVertex(GraphViewer *gv, vector<int>& path);
 void printStrongestComponents(vector<set<int> > strongestComponents);
 void adicionarTurista(vector<Person> &turistas, map<int, string> nameOfNodes);
 void level2(vector<Person> &turistas, map<int, string> nameOfNodes);
 void printPOIS( map<int, string> nameOfNodes);
-vector<int> calculatePath2(vector<int>& pois, vector<vector<int> >& W);
+vector<int> calculatePath(vector<int>& pois, vector<vector<int> >& W);
+vector<vector<int> > getPathsFromUser();
+vector<int> getPathFromUser(int pathId);
 
 void level1(vector<Person> &turistas, map<int, string> nameOfNodes){
 	string valor;
@@ -115,62 +118,35 @@ void level2(vector<Person> &turistas, map<int, string> nameOfNodes){
 }
 
 int main() {
-	vector<Person> turistas;
 	MapReading mr ;
 	mr.makeManualGraph();
+
 	GraphViewer *gv = new GraphViewer(900, 600, false);
 	gv->createWindow(900, 600);
 	gv->defineEdgeCurved(false);
 	mr.sendDataToGraphViewerManual(gv);
 	gv->rearrange();
-	//level1(turistas, mr.getNameOfNodes());
 
-	vector<vector<string> > paths;
-	int idPath = 0;
-	cout << "Gerador de autocarros\n";
-	while(1){
-		vector<string> path;
-		cout << "Indique os Pois do autocarro " << idPath+1 << "\n";
-		cout << "Poi de partida(-1 para terminar): ";
-		string s;
-		getline(cin, s);
-		if(s == "-1")
-			break;
-		path.push_back(s);
-		cout << "Poi de chegada: ";
-		getline(cin, s);
-		path.push_back(s);
-
-		while(1){
-			cout << "Indique outro Poi(-1 para terminar): ";
-			getline(cin, s);
-			if(s == "-1")
-				break;
-			else
-				path.push_back(s);
-		}
-		paths.push_back(path);
-		idPath++;
-	}
-
-	vector<vector<int> > pathsInIntFormat = mr.getPathsInIntFormat(paths);
 	Graph<int> g = mr.getGraph();
-
 	g.floydWarshallShortestPath();
 	vector<vector<int> > W = g.getWeightBetweenAllVertexs();
 
-	for(int i = 0;i < pathsInIntFormat.size();i++){
-		vector<int> path = calculatePath2(pathsInIntFormat[i], W);
+	vector<vector<int> > paths = getPathsFromUser();
+	for(size_t i = 0;i < paths.size();i++){
+		vector<int> path = calculatePath(paths[i], W);
 
-		cout << "Caminho gerado" << endl;
+		cout << "Caminho " << i+1 << "\n";
 		vector<int> allPath = getAllPath(path, g);
 		printPath(allPath);
 		printColorEdges(gv, mr.getEdges(), mr.getEdgesProperties(), allPath, i);
+		printColorVertex(gv, path);
 		gv->rearrange();
 
 	}
-	getchar();
 
+	mr.sendVertexLabelsToGraphViewer(gv);
+
+	getchar();
 
 
 
@@ -260,6 +236,50 @@ int main() {
 	return 0;
 }
 
+vector<vector<int> > getPathsFromUser(){
+	vector<vector<int> > paths;
+	int pathId = 0;
+	string s;
+
+	cout << "Gerador de autocarros\n";
+	while(1){
+		if(pathId > 0){
+			cout << "Pretende adicionar outro autocarro(y/n)? ";
+			getline(cin, s);
+			if(s == "n")
+				break;
+		}
+		vector<int> path = getPathFromUser(pathId);
+		paths.push_back(path);
+		pathId++;
+	}
+	return paths;
+}
+
+vector<int> getPathFromUser(int pathId){
+	vector<int> path;
+	string s;
+	cout << "Indique os Pois do autocarro " << pathId+1 << "\n";
+
+	cout << "Poi de partida: ";
+	getline(cin, s);
+	path.push_back(atoi(s.c_str()));
+
+	cout << "Poi de chegada: ";
+	getline(cin, s);
+	path.push_back(atoi(s.c_str()));
+
+	while(1){
+		cout << "Indique outro Poi(-1 para terminar): ";
+		getline(cin, s);
+		if(s == "-1")
+			break;
+		else
+			path.push_back(atoi(s.c_str()));
+	}
+	return path;
+}
+
 void printStrongestComponents(vector<set<int> > strongestComponents){
 	cout << "Pontos do mapa com forte conectividade, caso seja preciso alterar a rota :) \n";
 	for(size_t i = 0;i < strongestComponents.size();i++){
@@ -322,7 +342,7 @@ vector<int> getArticulationPoints(Graph<int>& g, int idStart){
 
 void printPath(vector<int>& path){
 	for(size_t i = 0;i < path.size();i++){
-		if(i%30 == 0)
+		if(i%30 == 0 && i!= 0)
 			cout << endl;
 		cout << path[i] << " ";
 	}
@@ -353,7 +373,7 @@ void introduceTheProgram(){
 	getchar();
 }
 
-vector<int> calculatePath2(vector<int>& pois, vector<vector<int> >& W){
+vector<int> calculatePath(vector<int>& pois, vector<vector<int> >& W){
 	int idStart = pois[0];
 	int idEnd = pois[1];
 	Graph<int> graphWithPois = createGraphUsingPois(pois, W);
@@ -454,6 +474,11 @@ void printColorEdges(GraphViewer *gv, map<int, pair<int,int> >& edges, map<int, 
 				if(edges[j].second == allPath[i] && edges[j].first == allPath[i + 1])
 					gv->setEdgeColor(j, cores[val%7]);
 		}
+}
+
+void printColorVertex(GraphViewer *gv, vector<int>& path){
+	for(size_t i = 0;i<  path.size();i++)
+		gv->setVertexColor(path[i], "BLUE");
 }
 
 

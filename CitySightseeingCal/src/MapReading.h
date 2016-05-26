@@ -40,6 +40,7 @@ public:
 	Graph<int> getGraph();
 	void makeManualGraph();
 	map<int, string> getNameOfNodes();
+	map<int, pair<double,double> > getNodes();
 };
 
 #endif /* SRC_MAPREADING_H_ */

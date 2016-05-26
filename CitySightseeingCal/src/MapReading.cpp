@@ -265,5 +265,9 @@ map<int, string> MapReading::getNameOfNodes(){
 	return nameOfNodes;
 }
 
+map<int, pair<double,double> > MapReading::getNodes(){
+	return nodes;
+}
+
 
 

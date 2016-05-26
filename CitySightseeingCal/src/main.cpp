@@ -17,8 +17,8 @@ long int calcDistOfPath(vector<int> path, vector<vector<int> >& W);
 vector<int> getAllPath(vector<int>& path, Graph<int>& g);
 vector<int> calculatePath(vector<int>& pois, vector<vector<int> >& W);
 vector<vector<int> > constructPaths(MapReading& mr, GraphViewer *gv);
-vector<vector<int> > getPathsFromUser();
-vector<int> getPathFromUser(int pathId);
+vector<vector<int> > getPathsFromUser(MapReading& mr);
+vector<int> getPathFromUser(int pathId, MapReading& mr);
 vector<Bus> constructBuses(MapReading& mr, vector<vector<int> >& paths);
 void printPath(vector<int>& path);
 void printColorEdges(GraphViewer *gv, map<int, pair<int,int> >& edges, map<int, pair<double,bool> >& edgesProperties, vector<int> allPath, int val);
@@ -193,7 +193,7 @@ vector<vector<int> > constructPaths(MapReading& mr, GraphViewer *gv){
 	Graph<int> g = mr.getGraph();
 	g.floydWarshallShortestPath();
 	vector<vector<int> > W = g.getWeightBetweenAllVertexs();
-	vector<vector<int> > paths = getPathsFromUser();
+	vector<vector<int> > paths = getPathsFromUser(mr);
 
 	for(size_t i = 0;i < paths.size();i++){
 		vector<int> path = calculatePath(paths[i], W);
@@ -211,7 +211,7 @@ vector<vector<int> > constructPaths(MapReading& mr, GraphViewer *gv){
 	return paths;
 }
 
-vector<vector<int> > getPathsFromUser(){
+vector<vector<int> > getPathsFromUser(MapReading& mr){
 	vector<vector<int> > paths;
 	int pathId = 0;
 	string s;
@@ -224,33 +224,59 @@ vector<vector<int> > getPathsFromUser(){
 			if(s == "n")
 				break;
 		}
-		vector<int> path = getPathFromUser(pathId);
+		vector<int> path = getPathFromUser(pathId, mr);
 		paths.push_back(path);
 		pathId++;
 	}
 	return paths;
 }
 
-vector<int> getPathFromUser(int pathId){
+vector<int> getPathFromUser(int pathId, MapReading& mr){
 	vector<int> path;
 	string s;
+	int max = mr.getNodes().size();
+
 	cout << "Indique os Pois do autocarro " << pathId+1 << "\n";
-
-	cout << "Poi de partida: ";
-	getline(cin, s);
-	path.push_back(atoi(s.c_str()));
-
-	cout << "Poi de chegada: ";
-	getline(cin, s);
-	path.push_back(atoi(s.c_str()));
+	while(1){
+		cout << "Poi de partida: ";
+		getline(cin, s);
+		int val = atoi(s.c_str());
+		if(val > -1 && val < max){
+			path.push_back(val);
+			break;
+		}
+		else{
+			cout << "Id invalido. Insira novamente" << endl;
+		}
+	}
+	while(1){
+		cout << "Poi de chegada: ";
+		getline(cin, s);
+		int val = atoi(s.c_str());
+		if(val > -1 && val < max){
+			path.push_back(val);
+			break;
+		}
+		else{
+			cout << "Id invalido. Insira novamente" << endl;
+		}
+	}
 
 	while(1){
 		cout << "Indique outro Poi(-1 para terminar): ";
 		getline(cin, s);
 		if(s == "-1")
 			break;
-		else
-			path.push_back(atoi(s.c_str()));
+		else{
+			int val = atoi(s.c_str());
+			if(val > -1 && val < max){
+				path.push_back(val);
+				break;
+			}
+			else{
+				cout << "Id invalido. Insira novamente" << endl;
+			}
+		}
 	}
 	return path;
 }

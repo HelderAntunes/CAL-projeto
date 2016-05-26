@@ -487,7 +487,7 @@ void Graph<T>::salesmanProblemAux(Vertex<T> *vertexToProcess,Vertex<T> *endVerte
 	typename vector<Edge<T> >::iterator it= (vertexToProcess->adj).begin();
 	typename vector<Edge<T> >::iterator ite= (vertexToProcess->adj).end();
 	for (; it !=ite; it++)
-		if(numberEdgesVisited == vertexSet.size()-1){
+		if((size_t)numberEdgesVisited == vertexSet.size()-1){
 			res.push_back(endVertex->info);
 			return;
 		}

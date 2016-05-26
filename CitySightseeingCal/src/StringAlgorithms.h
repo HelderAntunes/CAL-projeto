@@ -101,7 +101,7 @@ float numApproximateStringMatching(string filename, string toSearch) {
 	ifstream ifs;
 	ifs.open(filename.c_str(), std::ifstream::in);
 	string p = "";
-	char c = ifs.get();
+
 	while (!ifs.eof()) {
 		ifs >> p;
 		count++;

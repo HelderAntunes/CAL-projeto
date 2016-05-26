@@ -140,9 +140,34 @@ void chooseByPersons(vector<Bus>& buses, Person& tourist){
 				}
 			}
 		}
+		vector<int> values;
+		for(size_t j = 0 ; j < buses.size(); j++){
+			Bus b = buses[j];
+			vector<Person> tourists = b.getTourists();
+			for(size_t k = 0; k < tourists.size(); k++){
+				int val = editDistance(name,tourists[k].getName());
+				if(val < 3){
+					cout << "Sera que se estava a referir a : " << tourists[k].getName()<< endl;
+					cout <<"(s/n): ";
+					string ans;
+					getline(cin, ans);
+
+					if(ans == "s"){
+						buses[j].addTourist(tourist);
+						return;
+					}
+					if(ans == "n")
+						break;
+
+				}
+			}
+		}
+
+
 		cout << "Nao foi encontrado nenhum turista com esse nome. Tente de novo.\n";
 	}
 }
+
 
 void chooseByPOI(vector<Bus>& buses, Person& tourist){
 	system("cls");

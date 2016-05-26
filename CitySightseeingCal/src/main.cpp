@@ -271,7 +271,7 @@ vector<int> getPathFromUser(int pathId, MapReading& mr){
 			int val = atoi(s.c_str());
 			if(val > -1 && val < max){
 				path.push_back(val);
-				break;
+
 			}
 			else{
 				cout << "Id invalido. Insira novamente" << endl;

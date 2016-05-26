@@ -791,7 +791,7 @@ int Graph<T>::edgeCost(int i, int j){
 		return 0;
 	Vertex<T>* s = vertexSet[i];
 	Vertex<T>* d = vertexSet[j];
-	for(int i = 0;i < s->adj.size();i++)
+	for(size_t i = 0;i < s->adj.size();i++)
 		if(s->adj[i].dest == d)
 			return s->adj[i].weight;
 	return INT_INFINITY;
@@ -799,17 +799,17 @@ int Graph<T>::edgeCost(int i, int j){
 
 template<class T>
 void Graph<T>::floydWarshallShortestPath(){
-	int V = vertexSet.size();
+	size_t V = vertexSet.size();
 	W = vector<vector<int> > (V, vector<int> (V));
 	P = vector<vector<int> > (V, vector<int> (V));
-	for(int i = 0;i < V;i++)
-		for(int j = 0;j < V;j++){
+	for(size_t i = 0;i < V;i++)
+		for(size_t j = 0;j < V;j++){
 			W[i][j] = edgeCost(i,j);
 			P[i][j] = j;
 		}
-	for(int i = 0;i < V;i++)
-		for(int j = 0;j < V;j++)
-			for(int k = 0;k < V;k++){
+	for(size_t i = 0;i < V;i++)
+		for(size_t j = 0;j < V;j++)
+			for(size_t k = 0;k < V;k++){
 				int newDist = W[j][i]+W[i][k];
 				if(newDist > 0)
 					if(newDist < W[j][k]){
@@ -830,7 +830,7 @@ vector<T> Graph<T>::getfloydWarshallPath(const T &origin, const T &dest){
 	Vertex<T>* s = getVertex(origin);
 	Vertex<T>* d = getVertex(dest);
 	int si, di;
-	for(int i = 0;i < vertexSet.size();i++){
+	for(size_t i = 0;i < vertexSet.size();i++){
 		if(vertexSet[i] == s){
 			si = i;
 		}

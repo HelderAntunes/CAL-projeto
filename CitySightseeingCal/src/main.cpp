@@ -48,9 +48,7 @@ int main() {
 
 	addTourists(buses);
 
-	showTheTouristsInBuses(buses);
 
-	getchar();
 	return 0;
 }
 
@@ -64,6 +62,10 @@ void showTheTouristsInBuses(vector<Bus>& buses){
 		}
 		cout << endl;
 	}
+
+
+	cout << "Pressione qualquer tecla para sair" << endl;
+	getchar();
 }
 
 void addTourists(vector<Bus>& buses){
@@ -72,7 +74,8 @@ void addTourists(vector<Bus>& buses){
 	bool isTheFirstTourist = true;
 	while(1){
 		cout << "1 - Inserir turista" << endl;
-		cout << "2 - Exit" << endl;
+		cout << "2 - Mostrar autocarros" << endl;
+		cout << "3 - Exit" << endl;
 		cout << "Indique a sua opcao: " ;
 		getline(cin, ans);
 
@@ -81,6 +84,8 @@ void addTourists(vector<Bus>& buses){
 			isTheFirstTourist = false;
 		}
 		else if(ans == "2")
+			showTheTouristsInBuses(buses);
+		else if(ans == "3")
 			break;
 		else
 			cout << "Opcao invalida, tente de novo.\n";

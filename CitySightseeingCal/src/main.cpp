@@ -35,7 +35,7 @@ int main() {
 	mr.makeManualGraph();
 
 	GraphViewer *gv = new GraphViewer(900, 600, false);
-	gv->createWindow(900, 600);
+	gv->createWindow(600, 600);
 	gv->defineEdgeCurved(false);
 	mr.sendDataToGraphViewerManual(gv);
 	gv->rearrange();
@@ -47,7 +47,6 @@ int main() {
 	vector<Bus> buses = constructBuses(mr, paths);
 
 	addTourists(buses);
-
 
 	return 0;
 }
@@ -62,7 +61,6 @@ void showTheTouristsInBuses(vector<Bus>& buses){
 		}
 		cout << endl;
 	}
-
 
 	cout << "Pressione qualquer tecla para sair" << endl;
 	getchar();
@@ -200,7 +198,6 @@ vector<vector<int> > constructPaths(MapReading& mr, GraphViewer *gv){
 
 		cout << "Caminho " << i+1 << "\n";
 		vector<int> allPath = getAllPath(path, g);
-
 		printPath(allPath);
 		printColorEdges(gv, mr.getEdges(), mr.getEdgesProperties(), allPath, i);
 		printColorVertex(gv, path);
@@ -323,11 +320,15 @@ Graph<int> createGraphUsingPois(vector<int>& poisV, vector<vector<int> >& W){
 	Graph<int> g;
 	for(size_t k = 0;k < poisV.size();k++)
 		g.addVertex(poisV[k]);
+
 	for(size_t k = 0;k < poisV.size();k++)
 		for(size_t w = 0;w < poisV.size();w++){
+			if(k == w)
+				continue;
 			int weight = W[poisV[k]][poisV[w]];
 			if(weight != 0 && weight != INT_INFINITY)
 				g.addEdge(poisV[k],poisV[w],weight);
+
 		}
 	return g;
 }

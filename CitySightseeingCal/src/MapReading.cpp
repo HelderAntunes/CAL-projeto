@@ -158,7 +158,7 @@ void MapReading::sendDataToGraphViewerManual(GraphViewer *gv){
 		int o = edges[i].first;
 		int d = edges[i].second;
 
-		if(weightOfEdges[i].second == false)
+		if(weightOfEdges[i].second == true)
 			gv->addEdge(i, o, d, EdgeType::UNDIRECTED);
 		else
 			gv->addEdge(i, o, d, EdgeType::DIRECTED);
@@ -235,30 +235,30 @@ void MapReading::makeManualGraph(){
 	edges[22] = pair<int,int>(18,19);
 	edges[23] = pair<int,int>(19,10);
 
-	weightOfEdges[0] = pair<double,bool>(5,false);
-	weightOfEdges[1] = pair<double,bool>(7,false);
-	weightOfEdges[2] = pair<double,bool>(4,false);
-	weightOfEdges[3] = pair<double,bool>(8,false);
-	weightOfEdges[4] = pair<double,bool>(1,false);
-	weightOfEdges[5] = pair<double,bool>(4,false);
-	weightOfEdges[6] = pair<double,bool>(9,false);
-	weightOfEdges[7] = pair<double,bool>(11,false);
-	weightOfEdges[8] = pair<double,bool>(35,false);
-	weightOfEdges[9] = pair<double,bool>(3,false);
-	weightOfEdges[10] = pair<double,bool>(7,false);
-	weightOfEdges[11] = pair<double,bool>(3,false);
-	weightOfEdges[12] = pair<double,bool>(15,false);
-	weightOfEdges[13] = pair<double,bool>(19,false);
-	weightOfEdges[14] = pair<double,bool>(7,false);
-	weightOfEdges[15] = pair<double,bool>(8,false);
-	weightOfEdges[16] = pair<double,bool>(5,false);
-	weightOfEdges[17] = pair<double,bool>(9,false);
-	weightOfEdges[18] = pair<double,bool>(13,false);
-	weightOfEdges[19] = pair<double,bool>(15,false);
-	weightOfEdges[20] = pair<double,bool>(18,false);
-	weightOfEdges[21] = pair<double,bool>(4,false);
-	weightOfEdges[22] = pair<double,bool>(6,false);
-	weightOfEdges[23] = pair<double,bool>(18,false);
+	weightOfEdges[0] = pair<double,bool>(5,true);
+	weightOfEdges[1] = pair<double,bool>(7,true);
+	weightOfEdges[2] = pair<double,bool>(4,true);
+	weightOfEdges[3] = pair<double,bool>(8,true);
+	weightOfEdges[4] = pair<double,bool>(1,true);
+	weightOfEdges[5] = pair<double,bool>(4,true);
+	weightOfEdges[6] = pair<double,bool>(9,true);
+	weightOfEdges[7] = pair<double,bool>(11,true);
+	weightOfEdges[8] = pair<double,bool>(35,true);
+	weightOfEdges[9] = pair<double,bool>(3,true);
+	weightOfEdges[10] = pair<double,bool>(7,true);
+	weightOfEdges[11] = pair<double,bool>(3,true);
+	weightOfEdges[12] = pair<double,bool>(15,true);
+	weightOfEdges[13] = pair<double,bool>(19,true);
+	weightOfEdges[14] = pair<double,bool>(7,true);
+	weightOfEdges[15] = pair<double,bool>(8,true);
+	weightOfEdges[16] = pair<double,bool>(5,true);
+	weightOfEdges[17] = pair<double,bool>(9,true);
+	weightOfEdges[18] = pair<double,bool>(13,true);
+	weightOfEdges[19] = pair<double,bool>(15,true);
+	weightOfEdges[20] = pair<double,bool>(18,true);
+	weightOfEdges[21] = pair<double,bool>(4,true);
+	weightOfEdges[22] = pair<double,bool>(6,true);
+	weightOfEdges[23] = pair<double,bool>(18,true);
 }
 
 map<int, string> MapReading::getNameOfNodes(){

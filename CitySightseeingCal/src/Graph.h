@@ -472,6 +472,7 @@ vector<T> Graph<T>::getPathSalesmanProblem(T idStart,T idEnd){
 	Vertex<T> *v = getVertex(idStart);
 	Vertex<T> *x = getVertex(idEnd);
 	salesmanProblemAux(v, x, res, 0);
+
 	return res;
 }
 
@@ -481,13 +482,13 @@ void Graph<T>::salesmanProblemAux(Vertex<T> *vertexToProcess,Vertex<T> *endVerte
 	numberEdgesVisited++;
 	res.push_back(vertexToProcess->info);
 
-
 	Vertex<T> *dest = NULL;
 	int weight = INT_INFINITY;
 	typename vector<Edge<T> >::iterator it= (vertexToProcess->adj).begin();
 	typename vector<Edge<T> >::iterator ite= (vertexToProcess->adj).end();
-	for (; it !=ite; it++)
-		if((size_t)numberEdgesVisited == vertexSet.size()-1){
+
+	for (; it !=ite; it++){
+		if((size_t)numberEdgesVisited >= vertexSet.size()-1){
 			res.push_back(endVertex->info);
 			return;
 		}
@@ -497,6 +498,8 @@ void Graph<T>::salesmanProblemAux(Vertex<T> *vertexToProcess,Vertex<T> *endVerte
 				weight = it->weight;
 			}
 		}
+	}
+
 	salesmanProblemAux(dest, endVertex, res, numberEdgesVisited);
 }
 
@@ -810,6 +813,8 @@ void Graph<T>::floydWarshallShortestPath(){
 	for(size_t i = 0;i < V;i++)
 		for(size_t j = 0;j < V;j++)
 			for(size_t k = 0;k < V;k++){
+				if(W[j][i] == INT_INFINITY || W[i][k] == INT_INFINITY)
+					continue;
 				int newDist = W[j][i]+W[i][k];
 				if(newDist > 0)
 					if(newDist < W[j][k]){

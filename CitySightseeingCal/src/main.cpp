@@ -86,7 +86,7 @@ void addTourists(vector<Bus>& buses){
 		else if(ans == "3")
 			break;
 		else
-			cout << "Opcao invalida, tente de novo.\n";
+			cout << "Opcao invalida, tente de novo." << endl;
 	}
 }
 
@@ -115,7 +115,7 @@ void addTourist(vector<Bus>& buses, bool isTheFirstTourist){
 				break;
 			}
 			else{
-				cout << "Opcao invalida, tente de novo.\n";
+				cout << "Opcao invalida, tente de novo." << endl;
 			}
 		}
 	}
@@ -147,24 +147,35 @@ void chooseByPersons(vector<Bus>& buses, Person& tourist){
 			for(size_t k = 0; k < tourists.size(); k++){
 				int val = editDistance(name,tourists[k].getName());
 				if(val < 3){
-					cout << "Sera que se estava a referir a : " << tourists[k].getName()<< endl;
-					cout <<"(s/n): ";
-					string ans;
-					getline(cin, ans);
+					boolean state = false;
+					while(1){
+						cout << "Sera que se estava a referir a : " << tourists[k].getName()<< endl;
+						cout <<"(s/n): ";
+						string ans;
+						getline(cin, ans);
 
-					if(ans == "s"){
-						buses[j].addTourist(tourist);
-						return;
+						if(ans == "s"){
+							buses[j].addTourist(tourist);
+							return;
+						}
+						else if(ans == "n"){
+							state = true;
+							break;
+						}
+						else{
+							cout << "resposta invalida, por favor, volte a tentat" << endl;
+						}
+
 					}
-					if(ans == "n")
+					if(state){
 						break;
-
+					}
 				}
 			}
 		}
 
 
-		cout << "Nao foi encontrado nenhum turista com esse nome. Tente de novo.\n";
+		cout << "Nao foi encontrado nenhum turista com esse nome. Tente de novo." << endl;
 	}
 }
 
@@ -182,12 +193,12 @@ void chooseByPOI(vector<Bus>& buses, Person& tourist){
 				return;
 			}
 		}
-		cout << "Nao foi encontrado nenhum caminho com esse nome. Tente de novo.\n";
+		cout << "Nao foi encontrado nenhum caminho que contenha um POI com esse nome. Tente de novo." << endl;
 	}
 }
 
 void printTourists(vector<Bus>& buses){
-	cout << "Turistas ja escolhidos:\n";
+	cout << "Turistas ja escolhidos:" << endl;
 	for(size_t i = 0;i < buses.size();i++){
 		vector<Person> personsInBus = buses[i].getTourists();
 		for(size_t j = 0;j < personsInBus.size();j++)
@@ -221,7 +232,7 @@ vector<vector<int> > constructPaths(MapReading& mr, GraphViewer *gv){
 	for(size_t i = 0;i < paths.size();i++){
 		vector<int> path = calculatePath(paths[i], W);
 
-		cout << "Caminho " << i+1 << "\n";
+		cout << "Caminho " << i+1 << endl;
 		vector<int> allPath = getAllPath(path, g);
 		printPath(allPath);
 		printColorEdges(gv, mr.getEdges(), mr.getEdgesProperties(), allPath, i);
@@ -238,7 +249,7 @@ vector<vector<int> > getPathsFromUser(MapReading& mr){
 	int pathId = 0;
 	string s;
 
-	cout << "Gerador de autocarros\n";
+	cout << "Gerador de autocarros" << endl;
 	while(1){
 		if(pathId > 0){
 			cout << "Pretende adicionar outro autocarro(y/n)? ";
@@ -258,7 +269,7 @@ vector<int> getPathFromUser(int pathId, MapReading& mr){
 	string s;
 	int max = mr.getNodes().size();
 
-	cout << "Indique os Pois do autocarro " << pathId+1 << "\n";
+	cout << "Indique os Pois do autocarro " << pathId+1 << endl;
 	while(1){
 		cout << "Poi de partida: ";
 		getline(cin, s);

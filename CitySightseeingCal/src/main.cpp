@@ -121,6 +121,24 @@ void addTourist(vector<Bus>& buses, bool isTheFirstTourist){
 	}
 }
 
+string minName(string name, vector<Person> tourists){
+
+	string minNome = "";
+	int min = 4000;
+	int value;
+	for(size_t i = 0; i < tourists.size(); i++){
+		value = editDistance(name,tourists[i].getName());
+
+		if(value < min){
+			min = value;
+			minNome = tourists[i].getName();
+		}
+	}
+
+	return minNome;
+}
+
+
 void chooseByPersons(vector<Bus>& buses, Person& tourist){
 	system("cls");
 	string name;
@@ -144,40 +162,39 @@ void chooseByPersons(vector<Bus>& buses, Person& tourist){
 		for(size_t j = 0 ; j < buses.size(); j++){
 			Bus b = buses[j];
 			vector<Person> tourists = b.getTourists();
-			for(size_t k = 0; k < tourists.size(); k++){
-				int val = editDistance(name,tourists[k].getName());
-				if(val < 3){
-					boolean state = false;
-					while(1){
-						cout << "Sera que se estava a referir a : " << tourists[k].getName()<< endl;
-						cout <<"(s/n): ";
-						string ans;
-						getline(cin, ans);
+			string nome = minName(name, tourists);
+			boolean state = false;
+			while(1){
+				cout << "Sera que se estava a referir a : " << nome << endl;
+				cout <<"(s/n): ";
+				string ans;
+				getline(cin, ans);
 
-						if(ans == "s"){
-							buses[j].addTourist(tourist);
-							return;
-						}
-						else if(ans == "n"){
-							state = true;
-							break;
-						}
-						else{
-							cout << "resposta invalida, por favor, volte a tentat" << endl;
-						}
-
-					}
-					if(state){
-						break;
-					}
+				if(ans == "s"){
+					buses[j].addTourist(tourist);
+					return;
 				}
+				else if(ans == "n"){
+					state = true;
+					break;
+				}
+				else{
+					cout << "resposta invalida, por favor, volte a tentar" << endl;
+				}
+
+			}
+			if(state){
+				break;
 			}
 		}
-
-
-		cout << "Nao foi encontrado nenhum turista com esse nome. Tente de novo." << endl;
 	}
+
+
+
+	cout << "Nao foi encontrado nenhum turista com esse nome. Tente de novo." << endl;
 }
+
+
 
 
 void chooseByPOI(vector<Bus>& buses, Person& tourist){
